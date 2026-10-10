@@ -13,8 +13,11 @@ python -m venv .venv
 pip install -r requirements.txt
 $env:DJANGO_SETTINGS_MODULE='settings'
 $env:DEBUG='True'
+$env:WEATHERAPI_KEY='your-weatherapi-key'
 python -m django runserver 8000
 ```
+
+Create a WeatherAPI.com account to obtain an API key. Keep the key in the backend environment only; never expose it through Vite or commit the real key.
 
 ### Frontend
 
@@ -40,12 +43,13 @@ After Render creates the services, set the following values using the actual ser
 - `ALLOWED_HOSTS`: include the backend's `onrender.com` hostname.
 - `FRONTEND_URL`: the frontend's complete `https://` URL.
 - `CORS_ALLOWED_ORIGINS`: the frontend's complete `https://` origin. For multiple origins, separate them with commas.
+- `WEATHERAPI_KEY`: the API key from your WeatherAPI.com account.
 
 ### Frontend static site
 
 Set `VITE_API_BASE_URL` to the backend's complete `https://` URL, then trigger a new frontend deploy because Vite reads this value at build time.
 
-The backend service runs from the `backend` root, starts with `gunicorn wsgi:application`, and uses `/api/health/` for health checks. The frontend service builds with `npm install` and `npm run build`, and publishes `dist`.
+After setting `WEATHERAPI_KEY`, redeploy the backend. The backend service runs from the `backend` root, starts with `gunicorn wsgi:application`, and uses `/api/health/` for health checks. The frontend service builds with `npm install` and `npm run build`, and publishes `dist`.
 
 ## Other hosting providers
 

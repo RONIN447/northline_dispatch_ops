@@ -2,6 +2,7 @@
 
 import json
 import math
+import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -28,7 +29,7 @@ except ModuleNotFoundError:
 
 try:
     from django.http import JsonResponse  # type: ignore[import-not-found]
-    from django.views.decorators.http import require_POST  # type: ignore[import-not-found]
+    from django.views.decorators.http import require_GET, require_POST  # type: ignore[import-not-found]
 except ModuleNotFoundError:
     class JsonResponse:
         """Fallback response object used when Django is unavailable."""
@@ -47,19 +48,34 @@ except ModuleNotFoundError:
 
         return _wrapped
 
+    def require_GET(view_func):
+        """Fallback decorator used when Django is unavailable."""
+
+        def _wrapped(*args, **kwargs):
+            raise RuntimeError(
+                "Django is not installed. Install project dependencies before using the routing API."
+            )
+
+        return _wrapped
+
 ROUTING_API_URL = "https://router.project-osrm.org/route/v1/driving/"
-GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search"
-WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
+WEATHERAPI_SEARCH_URL = "https://api.weatherapi.com/v1/search.json"
+WEATHERAPI_FORECAST_URL = "https://api.weatherapi.com/v1/forecast.json"
 
 # Every checkpoint carries a risk grade. This dictionary makes it easy to compare
 # and rank routes by severity in a predictable, operationally meaningful order.
 RISK_SCORES = {"Low": 0, "Moderate": 1, "High": 2, "Severe": 3, "No Travel": 4}
 MILES_PER_KILOMETER = 0.621371
-WEATHER_HOURLY_FIELDS = "rain,snowfall,wind_speed_10m"
+WEATHERAPI_FORECAST_DAYS = 3
+WEATHERAPI_MAX_PARALLEL_REQUESTS = 4
 
 
 class WeatherDataUnavailable(Exception):
     """Raised when a checkpoint cannot be matched to a real forecast value."""
+
+
+class WeatherProviderConfigurationError(Exception):
+    """Raised when WeatherAPI is not configured correctly."""
 
 
 class RouteAlternativesUnavailable(Exception):
@@ -68,6 +84,31 @@ class RouteAlternativesUnavailable(Exception):
 
 def health_check(request):
     return JsonResponse({"status": "ok"})
+
+
+@require_GET
+def location_suggestions(request):
+    try:
+        matches = search_locations(request.GET.get("q", ""))
+        return JsonResponse({
+            "results": [
+                {
+                    "id": f"{match['lat']},{match['lon']}",
+                    "name": match["name"],
+                    "admin1": match["region"],
+                    "country": match["country"],
+                }
+                for match in matches
+            ]
+        })
+    except requests.RequestException as error:
+        return _provider_error_response(error, "location search")
+    except WeatherProviderConfigurationError as error:
+        return JsonResponse({"error": str(error)}, status=503)
+    except WeatherDataUnavailable as error:
+        return JsonResponse({"error": str(error)}, status=502)
+    except (KeyError, TypeError, ValueError) as error:
+        return JsonResponse({"error": str(error) or "Invalid location search."}, status=400)
 
 
 def parse_departure(value):
@@ -122,6 +163,35 @@ def parse_location_name(value, field_name):
     return value.strip()
 
 
+def weather_api_key():
+    key = os.getenv("WEATHERAPI_KEY", "").strip()
+    if not key:
+        raise WeatherProviderConfigurationError(
+            "Weather forecasts and city suggestions require WEATHERAPI_KEY to be configured."
+        )
+    return key
+
+
+def _provider_error_response(error, service_name):
+    response = getattr(error, "response", None)
+    status_code = getattr(response, "status_code", None)
+    if status_code == 429:
+        return JsonResponse(
+            {"error": "WeatherAPI is rate-limited right now. Please wait a moment and try again."},
+            status=429,
+        )
+    if status_code in (401, 403):
+        return JsonResponse(
+            {"error": "WeatherAPI rejected its API key. Check the server's WEATHERAPI_KEY setting."},
+            status=502,
+        )
+    return JsonResponse(
+        {"error": f"The {service_name} provider is unavailable"
+         + (f" (HTTP {status_code})." if status_code else ".")},
+        status=502,
+    )
+
+
 def _sleep_before_retry(response=None, attempt=0):
     retry_after = None
     if response is not None and getattr(response, "headers", None):
@@ -160,30 +230,53 @@ def _perform_api_request(url, params=None, timeout=20, max_retries=3):
 
 
 @lru_cache(maxsize=256)
-def _geocode_cached(location_name):
+def _search_locations_cached(query):
     response = _perform_api_request(
-        GEOCODING_API_URL,
-        params={"name": location_name, "count": 1, "language": "en", "format": "json"},
+        WEATHERAPI_SEARCH_URL,
+        params={"key": weather_api_key(), "q": query},
         timeout=20,
     )
-    matches = response.json().get("results") or []
-    if not matches:
-        raise ValueError(f"Could not find location: {location_name}")
+    matches = response.json()
+    if not isinstance(matches, list):
+        raise WeatherDataUnavailable("The location provider returned an unexpected response.")
+    return [
+        {
+            "lat": match["lat"],
+            "lon": match["lon"],
+            "name": match.get("name", ""),
+            "region": match.get("region", ""),
+            "country": match.get("country", ""),
+            "timezone": match.get("tz_id", "UTC"),
+        }
+        for match in matches
+    ]
 
-    match = matches[0]
-    display_name = ", ".join(
-        part for part in (match.get("name"), match.get("admin1"), match.get("country")) if part
-    )
+
+def search_locations(query):
+    cleaned_query = query.strip()
+    if len(cleaned_query) < 2:
+        return []
+    if len(cleaned_query) > 100:
+        raise ValueError("Location search must be 100 characters or fewer.")
+    return _search_locations_cached(cleaned_query)
+
+
+def _display_location_name(match):
     return {
-        "lat": match["latitude"],
-        "lon": match["longitude"],
-        "label": display_name,
+        "label": ", ".join(
+            part for part in (match.get("name"), match.get("region"), match.get("country")) if part
+        ),
+        "lat": match["lat"],
+        "lon": match["lon"],
         "timezone": match.get("timezone", "UTC"),
     }
 
 
 def geocode_location(location_name):
-    return _geocode_cached(location_name.strip())
+    matches = search_locations(location_name)
+    if not matches:
+        raise ValueError(f"Could not find location: {location_name}")
+    return _display_location_name(matches[0])
 
 
 def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hour, load_weight):
@@ -226,123 +319,105 @@ def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hou
     return highest_weather_risk
 
 
-@lru_cache(maxsize=512)
-def _weather_for_point_cached(latitude, longitude, arrival_time_iso):
+def _get_weather_forecast(latitude, longitude):
     response = _perform_api_request(
-        WEATHER_API_URL,
+        WEATHERAPI_FORECAST_URL,
         params={
-            "latitude": latitude,
-            "longitude": longitude,
-            "hourly": "temperature_2m,precipitation,rain,snowfall,wind_speed_10m",
-            "forecast_days": 7,
-            "timezone": "UTC",
-            "wind_speed_unit": "mph",
-            "precipitation_unit": "inch",
+            "key": weather_api_key(),
+            "q": f"{latitude:.6f},{longitude:.6f}",
+            "days": WEATHERAPI_FORECAST_DAYS,
+            "aqi": "no",
+            "alerts": "no",
         },
         timeout=20,
     )
-    arrival_time = datetime.fromisoformat(arrival_time_iso)
-    return parse_weather_forecast(response.json().get("hourly", {}), arrival_time)
+    forecast_days = response.json().get("forecast", {}).get("forecastday", [])
+    return [
+        hour
+        for forecast_day in forecast_days
+        for hour in forecast_day.get("hour", [])
+    ]
 
 
 def get_weather_at(latitude, longitude, arrival_time):
-    arrival_time_iso = arrival_time.astimezone(timezone.utc).isoformat()
-    return _weather_for_point_cached(latitude, longitude, arrival_time_iso)
+    return parse_weather_forecast(
+        _get_weather_forecast(latitude, longitude),
+        arrival_time,
+    )
 
 
 def parse_weather_forecast(hourly_forecast, arrival_time):
-    forecast_times = hourly_forecast.get("time", [])
-    if not forecast_times:
+    if not hourly_forecast:
         raise WeatherDataUnavailable("The weather provider returned no hourly forecast.")
 
     arrival_utc = arrival_time.astimezone(timezone.utc)
-    forecast_index = min(
-        range(len(forecast_times)),
-        key=lambda index: abs(
-            datetime.fromisoformat(forecast_times[index]).replace(tzinfo=timezone.utc)
-            - arrival_utc
-        ).total_seconds(),
+    valid_hours = []
+    for hour in hourly_forecast:
+        try:
+            forecast_epoch = int(hour["time_epoch"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        valid_hours.append((forecast_epoch, hour))
+    if not valid_hours:
+        raise WeatherDataUnavailable("The weather provider returned an invalid forecast time.")
+
+    forecast_epoch, selected_hour = min(
+        valid_hours,
+        key=lambda item: abs(item[0] - arrival_utc.timestamp()),
     )
-    forecast_time = datetime.fromisoformat(forecast_times[forecast_index]).replace(
-        tzinfo=timezone.utc
-    )
+    forecast_time = datetime.fromtimestamp(forecast_epoch, timezone.utc)
     if abs((forecast_time - arrival_utc).total_seconds()) > 3600:
         raise WeatherDataUnavailable(
-            "The requested arrival time is outside the available weather forecast."
+            "The requested arrival time is outside WeatherAPI's available forecast."
         )
 
-    def forecast_value(field_name):
-        values = hourly_forecast.get(field_name, [])
-        if forecast_index >= len(values) or values[forecast_index] is None:
+    def forecast_value(field_name, label):
+        value = selected_hour.get(field_name)
+        if value is None:
             raise WeatherDataUnavailable(
-                f"The weather provider returned no {field_name} data for a checkpoint."
+                f"The weather provider returned no {label} data for a checkpoint."
             )
-        value = float(values[forecast_index])
-        if not math.isfinite(value) or value < 0:
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError, OverflowError) as error:
             raise WeatherDataUnavailable(
-                f"The weather provider returned invalid {field_name} data for a checkpoint."
+                f"The weather provider returned invalid {label} data for a checkpoint."
+            ) from error
+        if not math.isfinite(numeric_value) or numeric_value < 0:
+            raise WeatherDataUnavailable(
+                f"The weather provider returned invalid {label} data for a checkpoint."
             )
-        return value
+        return numeric_value
 
-    temperatures = hourly_forecast.get("temperature_2m", [])
     temperature_f = None
-    if forecast_index < len(temperatures) and temperatures[forecast_index] is not None:
-        # Temperatures may legitimately be below 0 C; unlike precipitation and wind,
-        # they must not go through the non-negative weather-value validator above.
-        temperature_c = float(temperatures[forecast_index])
-        if not math.isfinite(temperature_c):
+    if selected_hour.get("temp_f") is not None:
+        try:
+            temperature_f = float(selected_hour["temp_f"])
+        except (TypeError, ValueError, OverflowError) as error:
+            raise WeatherDataUnavailable(
+                "The weather provider returned invalid temperature data for a checkpoint."
+            ) from error
+        if not math.isfinite(temperature_f):
             raise WeatherDataUnavailable(
                 "The weather provider returned invalid temperature data for a checkpoint."
             )
-        temperature_f = temperature_c * 9 / 5 + 32
 
     return {
-        "windMph": forecast_value("wind_speed_10m"),
-        "rainInHr": forecast_value("rain"),
-        "snowInHr": forecast_value("snowfall"),
+        "windMph": forecast_value("wind_mph", "wind"),
+        "rainInHr": forecast_value("precip_in", "precipitation"),
+        "snowInHr": forecast_value("snow_cm", "snowfall") * 0.3937007874,
         "temperatureF": temperature_f,
-        "forecastHour": forecast_times[forecast_index],
+        "forecastHour": forecast_time.isoformat(),
     }
 
 
 def get_weather_for_locations(checkpoint_locations):
-    weather_results = []
-    batch_size = 50
-    for batch_start in range(0, len(checkpoint_locations), batch_size):
-        batch = checkpoint_locations[batch_start:batch_start + batch_size]
-        response = _perform_api_request(
-            WEATHER_API_URL,
-            params={
-                "latitude": ",".join(f"{latitude:.6f}" for _, latitude, _, _ in batch),
-                "longitude": ",".join(f"{longitude:.6f}" for _, _, longitude, _ in batch),
-                "hourly": WEATHER_HOURLY_FIELDS,
-                "forecast_days": forecast_days_for_locations(batch),
-                "timezone": "UTC",
-                "wind_speed_unit": "mph",
-                "precipitation_unit": "inch",
-            },
-            timeout=20,
-        )
-        forecast_data = response.json()
-        forecasts = forecast_data if isinstance(forecast_data, list) else [forecast_data]
-        if len(forecasts) != len(batch):
-            raise WeatherDataUnavailable(
-                "The weather provider returned an unexpected number of checkpoint forecasts."
-            )
-        weather_results.extend(
-            parse_weather_forecast(forecast.get("hourly", {}), arrival)
-            for forecast, (_, _, _, arrival) in zip(forecasts, batch)
-        )
-    return weather_results
+    def fetch_weather(location):
+        _, latitude, longitude, arrival = location
+        return get_weather_at(latitude, longitude, arrival)
 
-
-def forecast_days_for_locations(checkpoint_locations):
-    latest_arrival = max(location[3] for location in checkpoint_locations)
-    hours_until_arrival = max(
-        0,
-        (latest_arrival - datetime.now(timezone.utc)).total_seconds() / 3600,
-    )
-    return min(7, max(1, math.ceil(hours_until_arrival / 24) + 1))
+    with ThreadPoolExecutor(max_workers=WEATHERAPI_MAX_PARALLEL_REQUESTS) as executor:
+        return list(executor.map(fetch_weather, checkpoint_locations))
 
 
 # The map needs a coordinate at an exact route position, not just the start or end.
@@ -701,16 +776,9 @@ def plan_route(request):
             "forecastHours": 48,
         })
     except requests.RequestException as error:
-        response = getattr(error, "response", None)
-        if getattr(response, "status_code", None) == 429:
-            return JsonResponse(
-                {"error": "The weather service is rate-limited right now. Please wait a moment and try again."},
-                status=429,
-            )
-        return JsonResponse(
-            {"error": f"A routing, geocoding, or weather service is unavailable: {error}"},
-            status=502,
-        )
+        return _provider_error_response(error, "routing or weather")
+    except WeatherProviderConfigurationError as error:
+        return JsonResponse({"error": str(error)}, status=503)
     except WeatherDataUnavailable as error:
         return JsonResponse({"error": str(error)}, status=502)
     except RouteAlternativesUnavailable as error:

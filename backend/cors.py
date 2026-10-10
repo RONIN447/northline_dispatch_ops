@@ -27,7 +27,7 @@ class CorsMiddleware:
         if origin in allowed_origins:
             response["Access-Control-Allow-Origin"] = origin
             response["Vary"] = "Origin"
-            response["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+            response["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
             response["Access-Control-Allow-Headers"] = "Content-Type, X-CSRFToken"
             response["Access-Control-Max-Age"] = "600"
         return response
