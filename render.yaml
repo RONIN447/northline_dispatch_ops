@@ -24,8 +24,6 @@ services:
         value: "https://northline-frontend.onrender.com"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://northline-frontend.onrender.com"
-      - key: WEATHERAPI_KEY
-        sync: false
 
   - type: static
     name: northline-frontend

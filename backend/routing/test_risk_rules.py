@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 from unittest.mock import patch
 
@@ -13,16 +13,15 @@ from routing.views import (
     coordinate_at_route_fraction,
     get_weather_at,
     get_weather_for_locations,
+    forecast_days_for_locations,
     fetch_route_options,
     health_check,
-    location_suggestions,
     plan_route,
     parse_checkpoint_spacing,
     parse_departure,
     parse_load_weight,
     parse_location_name,
     RouteAlternativesUnavailable,
-    WeatherProviderConfigurationError,
 )
 
 
@@ -168,24 +167,14 @@ class RouteGeometryTests(unittest.TestCase):
 
 class WeatherForecastTests(unittest.TestCase):
     def setUp(self):
-        self.api_key_patch = patch("routing.views.weather_api_key", return_value="test-weatherapi-key")
-        self.api_key_patch.start()
-        self.addCleanup(self.api_key_patch.stop)
         self.arrival = datetime(2026, 10, 10, 12, 20, tzinfo=timezone.utc)
-        self.hourly = [
-            {
-                "time_epoch": int(datetime(2026, 10, 10, hour, tzinfo=timezone.utc).timestamp()),
-                "temp_f": temperature,
-                "wind_mph": wind,
-                "precip_in": rain,
-                "snow_cm": snow,
-            }
-            for hour, temperature, wind, rain, snow in (
-                (11, 68, 10, 0, 0),
-                (12, 69.8, 30, 0.25, 1.27),
-                (13, 71, 12, 0, 0),
-            )
-        ]
+        self.hourly = {
+            "time": ["2026-10-10T11:00", "2026-10-10T12:00", "2026-10-10T13:00"],
+            "temperature_2m": [20, 21, 22],
+            "wind_speed_10m": [10, 30, 12],
+            "rain": [0, 0.25, 0],
+            "snowfall": [0, 0.5, 0],
+        }
 
     def mock_response(self, hourly):
         class Response:
@@ -193,7 +182,7 @@ class WeatherForecastTests(unittest.TestCase):
                 return None
 
             def json(self):
-                return {"forecast": {"forecastday": [{"hour": hourly}]}}
+                return {"hourly": hourly}
 
         return Response()
 
@@ -205,13 +194,19 @@ class WeatherForecastTests(unittest.TestCase):
         self.assertEqual(weather["rainInHr"], 0.25)
         self.assertAlmostEqual(weather["snowInHr"], 0.5)
         self.assertAlmostEqual(weather["temperatureF"], 69.8)
-        self.assertEqual(get.call_args.kwargs["params"]["days"], 3)
-        self.assertEqual(get.call_args.kwargs["params"]["key"], "test-weatherapi-key")
-        self.assertEqual(get.call_args.kwargs["params"]["q"], "37.000000,-120.000000")
+        self.assertEqual(get.call_args.kwargs["params"]["forecast_days"], 7)
 
     @patch("routing.views.requests.get")
     def test_fetches_multiple_checkpoint_forecasts_in_one_request(self, get):
-        get.return_value = self.mock_response(self.hourly)
+        class Response:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return [{"hourly": self_hourly}, {"hourly": self_hourly}]
+
+        self_hourly = self.hourly
+        get.return_value = Response()
         locations = [
             (0, 37, -120, self.arrival),
             (25, 38, -121, self.arrival),
@@ -221,25 +216,33 @@ class WeatherForecastTests(unittest.TestCase):
 
         self.assertEqual(len(weather), 2)
         self.assertTrue(all(item["windMph"] == 30 for item in weather))
-        self.assertEqual(get.call_count, 2)
-        queried_locations = {
-            call.kwargs["params"]["q"] for call in get.call_args_list
-        }
-        self.assertEqual(queried_locations, {"37.000000,-120.000000", "38.000000,-121.000000"})
+        self.assertEqual(get.call_count, 1)
+        self.assertEqual(get.call_args.kwargs["params"]["latitude"], "37.000000,38.000000")
+        self.assertEqual(get.call_args.kwargs["params"]["longitude"], "-120.000000,-121.000000")
+        self.assertEqual(get.call_args.kwargs["params"]["hourly"], "rain,snowfall,wind_speed_10m")
+
+    def test_forecast_request_days_cover_arrival_without_always_fetching_seven(self):
+        latest_arrival = datetime.now(timezone.utc).replace(microsecond=0)
+        locations = [(0, 37, -120, latest_arrival)]
+        self.assertEqual(forecast_days_for_locations(locations), 1)
+
+        latest_arrival += timedelta(hours=36)
+        locations = [(0, 37, -120, latest_arrival)]
+        self.assertEqual(forecast_days_for_locations(locations), 3)
 
     @patch("routing.views.requests.get")
     def test_allows_subzero_temperature(self, get):
-        hourly = [dict(entry) for entry in self.hourly]
-        hourly[1]["temp_f"] = -5
+        hourly = dict(self.hourly)
+        hourly["temperature_2m"] = [-6, -5, -4]
         get.return_value = self.mock_response(hourly)
 
         weather = get_weather_at(46.8, 9.8, self.arrival)
 
-        self.assertEqual(weather["temperatureF"], -5)
+        self.assertAlmostEqual(weather["temperatureF"], 23.0)
 
     @patch("routing.views.requests.get")
     def test_empty_or_out_of_range_forecast_fails_closed(self, get):
-        get.return_value = self.mock_response([])
+        get.return_value = self.mock_response({"time": []})
         with self.assertRaises(WeatherDataUnavailable):
             get_weather_at(37, -120, self.arrival)
 
@@ -250,14 +253,14 @@ class WeatherForecastTests(unittest.TestCase):
 
     @patch("routing.views.requests.get")
     def test_missing_or_invalid_risk_variable_fails_closed(self, get):
-        missing_wind = [dict(entry) for entry in self.hourly]
-        missing_wind[1]["wind_mph"] = None
+        missing_wind = dict(self.hourly)
+        missing_wind["wind_speed_10m"] = [0, None, 0]
         get.return_value = self.mock_response(missing_wind)
         with self.assertRaises(WeatherDataUnavailable):
             get_weather_at(37, -120, self.arrival)
 
-        invalid_rain = [dict(entry) for entry in self.hourly]
-        invalid_rain[1]["precip_in"] = float("nan")
+        invalid_rain = dict(self.hourly)
+        invalid_rain["rain"] = [0, float("nan"), 0]
         get.return_value = self.mock_response(invalid_rain)
         with self.assertRaises(WeatherDataUnavailable):
             get_weather_at(37, -120, self.arrival)
@@ -279,30 +282,6 @@ class PlanRouteApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {"status": "ok"})
-
-    @patch("routing.views.search_locations")
-    def test_location_suggestions_returns_weatherapi_results(self, search_locations):
-        search_locations.return_value = [{
-            "lat": 42.36,
-            "lon": -71.06,
-            "name": "Boston",
-            "region": "Massachusetts",
-            "country": "United States",
-            "timezone": "America/New_York",
-        }]
-        response = location_suggestions(self.factory.get("/api/locations/?q=Boston"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            json.loads(response.content)["results"][0],
-            {
-                "id": "42.36,-71.06",
-                "name": "Boston",
-                "admin1": "Massachusetts",
-                "country": "United States",
-            },
-        )
-        search_locations.assert_called_once_with("Boston")
 
     @patch("routing.views.requests.get")
     def test_fetch_route_options_uses_distinct_via_routes_when_provider_returns_one(self, get):
@@ -451,8 +430,7 @@ class PlanRouteApiTests(unittest.TestCase):
         )
 
     @patch("routing.views.requests.get")
-    @patch("routing.views.weather_api_key", return_value="test-weatherapi-key")
-    def test_plan_route_reports_rate_limit_as_client_error(self, weather_api_key, requests_get):
+    def test_plan_route_reports_rate_limit_as_client_error(self, requests_get):
         class RateLimitedResponse:
             status_code = 429
             headers = {}
@@ -474,22 +452,6 @@ class PlanRouteApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 429)
         self.assertIn("rate-limited", json.loads(response.content)["error"])
-
-    @patch("routing.views.requests.get")
-    @patch("routing.views.weather_api_key", side_effect=WeatherProviderConfigurationError(
-        "WeatherAPI key is missing."
-    ))
-    def test_plan_route_reports_missing_weatherapi_key(self, weather_api_key, requests_get):
-        request = self.factory.post(
-            "/api/plan/",
-            data=json.dumps(self.payload),
-            content_type="application/json",
-        )
-        response = plan_route(request)
-
-        self.assertEqual(response.status_code, 503)
-        self.assertIn("WeatherAPI key is missing", json.loads(response.content)["error"])
-        requests_get.assert_not_called()
 
     @patch("routing.views.geocode_location")
     def test_plan_route_rejects_missing_location_before_external_calls(self, geocode_location):

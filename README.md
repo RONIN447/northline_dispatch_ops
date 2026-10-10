@@ -64,10 +64,9 @@ Additional load rules: wind from 45 to under 55 mph becomes **No Travel** above 
 flowchart LR
     Dispatcher[Dispatcher] -->|trip details| Web[React + Vite planner]
     Web -->|POST /api/plan/| API[Django route API]
-    Web -->|location suggestions| API
-    API -->|geocode| Geo[WeatherAPI.com Search]
+    API -->|geocode| Geo[Open-Meteo Geocoding]
     API -->|driving alternatives| OSRM[OSRM]
-    API -->|checkpoint forecasts| Weather[WeatherAPI.com Forecast]
+    API -->|checkpoint forecasts| Weather[Open-Meteo Forecast]
     API -->|ranked routes + weather| Web
     Web -->|route and risk layers| Map[Leaflet map]
 ```
@@ -77,7 +76,7 @@ flowchart LR
 | Frontend | React 18, Vite, Leaflet, React Leaflet, Lucide |
 | Backend | Python, Django, Requests |
 | Route provider | OSRM public routing service |
-| Geocoding and weather | WeatherAPI.com Search and Forecast APIs |
+| Geocoding and weather | Open-Meteo APIs |
 | Hosting | Render static site and web service |
 
 ## Run locally
@@ -99,13 +98,10 @@ python -m venv .venv
 pip install -r requirements.txt
 $env:DJANGO_SETTINGS_MODULE = "settings"
 $env:DEBUG = "True"
-$env:WEATHERAPI_KEY = "your-weatherapi-key"
 python -m django runserver 8000
 ```
 
 The API is available at `http://127.0.0.1:8000`. The backend health endpoint is `http://127.0.0.1:8000/api/health/`.
-Create a WeatherAPI.com account and set its API key as `WEATHERAPI_KEY` in the backend environment. Keep the key on the server; do not put it in frontend code or commit it.
-
 ### 2. Start the frontend
 
 In a second PowerShell window from the repository root:
@@ -168,13 +164,13 @@ The live application is hosted on Render:
 - **Frontend:** [northline-frontend.onrender.com](https://northline-frontend.onrender.com/)
 - **Backend health:** [northline-backend-wvdw.onrender.com/api/health/](https://northline-backend-wvdw.onrender.com/api/health/)
 
-The root [`render.yaml`](./render.yaml) defines both services. Create or update the Render Blueprint from this repository to provision the static frontend and Django backend. Set `WEATHERAPI_KEY` in the backend service's Render environment using your WeatherAPI.com key. Keep `SECRET_KEY` in Render's environment settings, set `DEBUG=False`, and use the deployed frontend origin for the backend's `FRONTEND_URL` and `CORS_ALLOWED_ORIGINS`.
+The root [`render.yaml`](./render.yaml) defines both services. Create or update the Render Blueprint from this repository to provision the static frontend and Django backend. Keep `SECRET_KEY` in Render's environment settings, set `DEBUG=False`, and use the deployed frontend origin for the backend's `FRONTEND_URL` and `CORS_ALLOWED_ORIGINS`.
 
 The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing that value. See the [deployment guide](./docs/DEPLOYMENT.md) for configuration details. The free backend instance may spin down while idle, so its first request after inactivity can take longer.
 
 ## Limitations and safety
 
-- OSRM and WeatherAPI.com are external services and may be subject to availability, plan limits, or rate limits. WeatherAPI.com's free forecast plan provides a limited forecast horizon; trips outside the available forecast fail closed rather than being scored as safe.
+- OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
 - Weather is sampled from hourly forecast data; conditions can change between forecast hours and checkpoints.
 - OSRM may not be able to find three distinct drivable routes for every pair of locations. In that case, planning fails with an explanation instead of showing fewer than three options or presenting duplicate paths as alternatives.
 - This application provides decision support, not a guarantee of road safety. Follow current carrier policy, official road advisories, and applicable regulations before dispatch.

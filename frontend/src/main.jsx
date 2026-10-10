@@ -274,9 +274,14 @@ function CityAutocomplete({ id, label, value, onChange, icon: Icon }) {
       setIsSearching(true);
       setSuggestionError('');
       try {
-        const params = new URLSearchParams({ q: query });
+        const params = new URLSearchParams({
+          name: query,
+          count: '6',
+          language: 'en',
+          format: 'json',
+        });
         const response = await fetch(
-          `${API_BASE_URL}/api/locations/?${params}`,
+          `https://geocoding-api.open-meteo.com/v1/search?${params}`,
           { signal: controller.signal },
         );
         if (!response.ok) throw new Error(`City search failed (${response.status}).`);
@@ -449,7 +454,7 @@ function RoutePlanner({ formValues, onFieldChange, onSubmit, isLoading, errorMes
         <ShieldCheck size={16} />
         <span><b>Load-aware safety</b><br />Wind, rain, and snow thresholds are adjusted for cargo weight and route exposure.</span>
       </div>
-      <div className="sidebar-foot">Route data by OSRM <span>·</span> weather by WeatherAPI.com</div>
+      <div className="sidebar-foot">Route data by OSRM <span>·</span> weather by Open-Meteo</div>
     </aside>
   );
 }
