@@ -429,6 +429,11 @@ class PlanRouteApiTests(unittest.TestCase):
         self.assertEqual(body["recommendedRouteId"], "route-2-alternative-1")
         self.assertTrue(all(route["checkpoints"] for route in body["routes"]))
         self.assertTrue(all("rankKey" not in route for route in body["routes"]))
+        get_weather_for_locations.assert_called_once()
+        self.assertGreater(
+            len(get_weather_for_locations.call_args.args[0]),
+            len(body["routes"][0]["checkpoints"]),
+        )
 
     @patch("routing.views.requests.get")
     def test_plan_route_reports_rate_limit_as_client_error(self, requests_get):

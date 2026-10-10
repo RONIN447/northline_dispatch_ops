@@ -533,14 +533,11 @@ def fetch_route_options(origin, destination):
     )
 
 
-def build_route_summary(
-    route_data, origin, destination, departure_time, load_weight, checkpoint_spacing, route_index
-):
+def build_checkpoint_locations(route_data, departure_time, checkpoint_spacing):
     route_coordinates = route_data["geometry"]["coordinates"]
     distance_miles = route_data["distance"] / 1000 * MILES_PER_KILOMETER
     travel_hours = route_data["duration"] / 3600
     checkpoint_count = max(1, math.ceil(distance_miles / checkpoint_spacing))
-    checkpoints = []
     checkpoint_locations = []
 
     # Generate evenly spaced checkpoints and their estimated arrival times.
@@ -555,7 +552,33 @@ def build_route_summary(
         estimated_arrival = datetime.fromtimestamp(arrival_timestamp, timezone.utc)
         checkpoint_locations.append((distance_along_route, latitude, longitude, estimated_arrival))
 
-    weather_results = get_weather_for_locations(checkpoint_locations)
+    return checkpoint_locations
+
+
+def build_route_summary(
+    route_data,
+    origin,
+    destination,
+    departure_time,
+    load_weight,
+    checkpoint_spacing,
+    route_index,
+    weather_results=None,
+):
+    route_coordinates = route_data["geometry"]["coordinates"]
+    distance_miles = route_data["distance"] / 1000 * MILES_PER_KILOMETER
+    travel_hours = route_data["duration"] / 3600
+    checkpoint_locations = build_checkpoint_locations(
+        route_data, departure_time, checkpoint_spacing
+    )
+    checkpoints = []
+
+    if weather_results is None:
+        weather_results = get_weather_for_locations(checkpoint_locations)
+    if len(weather_results) != len(checkpoint_locations):
+        raise WeatherDataUnavailable(
+            "The weather provider returned an unexpected number of checkpoint forecasts."
+        )
 
     for (distance_along_route, latitude, longitude, estimated_arrival), weather in zip(
         checkpoint_locations, weather_results
@@ -636,19 +659,33 @@ def plan_route(request):
         if not routes:
             return JsonResponse({"error": "No drivable routes found."}, status=422)
 
-        with ThreadPoolExecutor(max_workers=len(routes)) as executor:
-            route_summaries = list(executor.map(
-                lambda route_details: build_route_summary(
-                    route_details[1],
-                    origin,
-                    destination,
-                    departure_time,
-                    load_weight,
-                    checkpoint_spacing,
-                    route_details[0],
-                ),
-                enumerate(routes, start=1),
+        route_checkpoints = [
+            build_checkpoint_locations(route, departure_time, checkpoint_spacing)
+            for route in routes
+        ]
+        all_checkpoint_locations = [
+            checkpoint
+            for checkpoints in route_checkpoints
+            for checkpoint in checkpoints
+        ]
+        all_weather_results = get_weather_for_locations(all_checkpoint_locations)
+        route_summaries = []
+        weather_offset = 0
+        for route_index, (route_data, checkpoint_locations) in enumerate(
+            zip(routes, route_checkpoints), start=1
+        ):
+            weather_end = weather_offset + len(checkpoint_locations)
+            route_summaries.append(build_route_summary(
+                route_data,
+                origin,
+                destination,
+                departure_time,
+                load_weight,
+                checkpoint_spacing,
+                route_index,
+                all_weather_results[weather_offset:weather_end],
             ))
+            weather_offset = weather_end
         # Operational ranking is intentionally safety-first: the route with the least
         # severe exposure is selected before duration is considered.
         route_summaries.sort(key=lambda route: route["rankKey"])
