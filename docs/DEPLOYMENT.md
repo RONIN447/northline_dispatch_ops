@@ -1,10 +1,10 @@
-# Deployment Guide
-
-This project is ready to be run locally and staged for deployment.
+# Development and deployment
 
 ## Local development
 
-Backend:
+Use Python 3.9+ and Node.js 18+.
+
+### Backend
 
 ```powershell
 cd backend
@@ -12,54 +12,41 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 $env:DJANGO_SETTINGS_MODULE='settings'
+$env:DEBUG='True'
 python -m django runserver 8000
 ```
 
-Frontend:
+### Frontend
+
+In a second terminal:
 
 ```powershell
 cd frontend
 npm install
-npm run dev -- --host 0.0.0.0 --port 5173
+$env:VITE_API_BASE_URL='http://127.0.0.1:8000'
+npm run dev
 ```
 
-## Production hosting options
+## Render Blueprint
 
-### Render (recommended for full-stack Django + React)
+The root `render.yaml` defines one Django web service and one static site. Push the project to GitHub, create a Render Blueprint from that repository, and review the two services and their generated URLs before applying it.
 
-1. Create a new Web Service for the backend folder.
-2. Use Python 3.9+ and install from `backend/requirements.txt`.
-3. Set environment variables:
-   - `DJANGO_SETTINGS_MODULE=settings`
-   - `SECRET_KEY`
-   - `DEBUG=False`
-   - `ALLOWED_HOSTS=*`
-4. Use the built-in start command:
+After Render creates the services, set the following values using the actual service URLs:
 
-```bash
-python manage.py migrate
-python manage.py collectstatic --noinput
-gunicorn settings.wsgi:application
-```
+### Backend web service
 
-5. Create a static site for the frontend and deploy `frontend/dist` after running:
+- `SECRET_KEY`: use a generated private value.
+- `DEBUG`: `False`.
+- `ALLOWED_HOSTS`: include the backend's `onrender.com` hostname.
+- `FRONTEND_URL`: the frontend's complete `https://` URL.
+- `CORS_ALLOWED_ORIGINS`: the frontend's complete `https://` origin. For multiple origins, separate them with commas.
 
-```bash
-npm install
-npm run build
-```
+### Frontend static site
 
-### Vercel + Render split
+Set `VITE_API_BASE_URL` to the backend's complete `https://` URL, then trigger a new frontend deploy because Vite reads this value at build time.
 
-- Frontend: deploy the `frontend` app to Vercel.
-- Backend: deploy the `backend` app to Render or Railway.
-- Update the frontend fetch target to the deployed backend URL.
+The backend service runs from the `backend` root and starts with `gunicorn wsgi:application`. The frontend service builds with `npm install` and `npm run build`, and publishes `dist`.
 
-## Production hardening checklist
+## Other hosting providers
 
-- Replace demo OSRM and Open-Meteo usage with production-grade providers.
-- Move `SECRET_KEY` into environment variables.
-- Set `DEBUG=False`.
-- Add CORS and CSRF protections.
-- Use a real database instead of the default dev settings.
-- Add health checks and monitoring.
+For a different frontend host, set its URL in the backend's `FRONTEND_URL` and `CORS_ALLOWED_ORIGINS`. Set the backend URL in `VITE_API_BASE_URL` and rebuild the frontend. Do not commit production secrets or `.env` files.
