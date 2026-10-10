@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import json
 from unittest.mock import patch
 
+import requests
 from django.test import RequestFactory
 
 from routing.views import (
@@ -428,6 +429,30 @@ class PlanRouteApiTests(unittest.TestCase):
         self.assertEqual(body["recommendedRouteId"], "route-2-alternative-1")
         self.assertTrue(all(route["checkpoints"] for route in body["routes"]))
         self.assertTrue(all("rankKey" not in route for route in body["routes"]))
+
+    @patch("routing.views.requests.get")
+    def test_plan_route_reports_rate_limit_as_client_error(self, requests_get):
+        class RateLimitedResponse:
+            status_code = 429
+            headers = {}
+
+            def raise_for_status(self):
+                raise requests.exceptions.HTTPError(response=self)
+
+            def json(self):
+                return {}
+
+        requests_get.side_effect = requests.exceptions.HTTPError(response=RateLimitedResponse())
+
+        request = self.factory.post(
+            "/api/plan/",
+            data=json.dumps(self.payload),
+            content_type="application/json",
+        )
+        response = plan_route(request)
+
+        self.assertEqual(response.status_code, 429)
+        self.assertIn("rate-limited", json.loads(response.content)["error"])
 
     @patch("routing.views.geocode_location")
     def test_plan_route_rejects_missing_location_before_external_calls(self, geocode_location):

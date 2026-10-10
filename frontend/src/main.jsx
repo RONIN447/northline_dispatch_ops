@@ -610,6 +610,9 @@ function App() {
       if (!response.ok && !responseText) {
         throw new Error(`Route service is unavailable (${response.status}).`);
       }
+      if (response.status === 429) {
+        throw new Error('The weather service is rate-limited right now. Please wait a moment and try again.');
+      }
       if (!response.ok) throw new Error(responseBody.error || 'Route planning failed.');
 
       setRoutePlan(responseBody);

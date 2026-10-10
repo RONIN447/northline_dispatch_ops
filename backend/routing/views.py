@@ -3,8 +3,10 @@
 import json
 import math
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
+from functools import lru_cache
 
 try:
     import importlib
@@ -120,13 +122,50 @@ def parse_location_name(value, field_name):
     return value.strip()
 
 
-def geocode_location(location_name):
-    response = requests.get(
+def _sleep_before_retry(response=None, attempt=0):
+    retry_after = None
+    if response is not None and getattr(response, "headers", None):
+        retry_after_value = response.headers.get("Retry-After")
+        if retry_after_value is not None:
+            try:
+                retry_after = max(1, float(retry_after_value))
+            except (TypeError, ValueError):
+                retry_after = None
+    delay_seconds = retry_after if retry_after is not None else min(5.0, 0.75 * (2 ** attempt))
+    time.sleep(delay_seconds)
+    return delay_seconds
+
+
+def _perform_api_request(url, params=None, timeout=20, max_retries=3):
+    last_error = None
+    for attempt in range(max_retries + 1):
+        try:
+            response = requests.get(url, params=params, timeout=timeout)
+            status_code = getattr(response, "status_code", None)
+            if status_code == 429 and attempt < max_retries:
+                _sleep_before_retry(response, attempt)
+                continue
+            response.raise_for_status()
+            return response
+        except requests.RequestException as error:
+            last_error = error
+            response = getattr(error, "response", None)
+            if response is not None and getattr(response, "status_code", None) == 429 and attempt < max_retries:
+                _sleep_before_retry(response, attempt)
+                continue
+            raise
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Request to {url} failed without a response.")
+
+
+@lru_cache(maxsize=256)
+def _geocode_cached(location_name):
+    response = _perform_api_request(
         GEOCODING_API_URL,
         params={"name": location_name, "count": 1, "language": "en", "format": "json"},
         timeout=20,
     )
-    response.raise_for_status()
     matches = response.json().get("results") or []
     if not matches:
         raise ValueError(f"Could not find location: {location_name}")
@@ -141,6 +180,10 @@ def geocode_location(location_name):
         "label": display_name,
         "timezone": match.get("timezone", "UTC"),
     }
+
+
+def geocode_location(location_name):
+    return _geocode_cached(location_name.strip())
 
 
 def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hour, load_weight):
@@ -183,8 +226,9 @@ def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hou
     return highest_weather_risk
 
 
-def get_weather_at(latitude, longitude, arrival_time):
-    response = requests.get(
+@lru_cache(maxsize=512)
+def _weather_for_point_cached(latitude, longitude, arrival_time_iso):
+    response = _perform_api_request(
         WEATHER_API_URL,
         params={
             "latitude": latitude,
@@ -197,8 +241,13 @@ def get_weather_at(latitude, longitude, arrival_time):
         },
         timeout=20,
     )
-    response.raise_for_status()
+    arrival_time = datetime.fromisoformat(arrival_time_iso)
     return parse_weather_forecast(response.json().get("hourly", {}), arrival_time)
+
+
+def get_weather_at(latitude, longitude, arrival_time):
+    arrival_time_iso = arrival_time.astimezone(timezone.utc).isoformat()
+    return _weather_for_point_cached(latitude, longitude, arrival_time_iso)
 
 
 def parse_weather_forecast(hourly_forecast, arrival_time):
@@ -261,7 +310,7 @@ def get_weather_for_locations(checkpoint_locations):
     batch_size = 50
     for batch_start in range(0, len(checkpoint_locations), batch_size):
         batch = checkpoint_locations[batch_start:batch_start + batch_size]
-        response = requests.get(
+        response = _perform_api_request(
             WEATHER_API_URL,
             params={
                 "latitude": ",".join(f"{latitude:.6f}" for _, latitude, _, _ in batch),
@@ -274,7 +323,6 @@ def get_weather_for_locations(checkpoint_locations):
             },
             timeout=20,
         )
-        response.raise_for_status()
         forecast_data = response.json()
         forecasts = forecast_data if isinstance(forecast_data, list) else [forecast_data]
         if len(forecasts) != len(batch):
@@ -411,7 +459,7 @@ def fetch_route_options(origin, destination):
     origin_coordinate = f"{origin['lon']},{origin['lat']}"
     destination_coordinate = f"{destination['lon']},{destination['lat']}"
     route_url = f"{ROUTING_API_URL}{origin_coordinate};{destination_coordinate}"
-    response = requests.get(
+    response = _perform_api_request(
         route_url,
         params={
             "overview": "full",
@@ -421,7 +469,6 @@ def fetch_route_options(origin, destination):
         },
         timeout=30,
     )
-    response.raise_for_status()
     routing_result = response.json()
     if routing_result.get("code") != "Ok" or not routing_result.get("routes"):
         return []
@@ -449,7 +496,7 @@ def fetch_route_options(origin, destination):
             with ThreadPoolExecutor(max_workers=len(waypoint_requests)) as executor:
                 futures = [
                     executor.submit(
-                        requests.get,
+                        _perform_api_request,
                         waypoint_url,
                         params={
                             "overview": "full",
@@ -464,7 +511,6 @@ def fetch_route_options(origin, destination):
                 for future in as_completed(futures):
                     try:
                         candidate_response = future.result()
-                        candidate_response.raise_for_status()
                         candidate_result = candidate_response.json()
                     except requests.RequestException:
                         continue
@@ -618,6 +664,12 @@ def plan_route(request):
             "forecastHours": 48,
         })
     except requests.RequestException as error:
+        response = getattr(error, "response", None)
+        if getattr(response, "status_code", None) == 429:
+            return JsonResponse(
+                {"error": "The weather service is rate-limited right now. Please wait a moment and try again."},
+                status=429,
+            )
         return JsonResponse(
             {"error": f"A routing, geocoding, or weather service is unavailable: {error}"},
             status=502,
