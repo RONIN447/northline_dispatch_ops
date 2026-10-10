@@ -3,7 +3,7 @@
 import json
 import math
 import re
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 try:
@@ -58,6 +58,10 @@ WEATHER_HOURLY_FIELDS = "rain,snowfall,wind_speed_10m"
 
 class WeatherDataUnavailable(Exception):
     """Raised when a checkpoint cannot be matched to a real forecast value."""
+
+
+class RouteAlternativesUnavailable(Exception):
+    """Raised when the routing provider cannot produce three distinct routes."""
 
 
 def health_check(request):
@@ -341,6 +345,148 @@ def coordinate_at_route_fraction(route_coordinates, route_fraction):
     return route_coordinates[-1]
 
 
+def offset_route_waypoints(route_coordinates, offset_km):
+    """Create routing waypoints on either side of a route at three points."""
+    waypoints = []
+    for route_fraction in (0.35, 0.5, 0.65):
+        longitude, latitude = coordinate_at_route_fraction(
+            route_coordinates, route_fraction
+        )
+        before = coordinate_at_route_fraction(
+            route_coordinates, max(0, route_fraction - 0.02)
+        )
+        after = coordinate_at_route_fraction(
+            route_coordinates, min(1, route_fraction + 0.02)
+        )
+        longitude_scale = 111.32 * max(0.01, math.cos(math.radians(latitude)))
+        east = (after[0] - before[0]) * longitude_scale
+        north = (after[1] - before[1]) * 110.574
+        tangent_length = math.hypot(east, north)
+        if tangent_length == 0:
+            continue
+
+        for direction in (-1, 1):
+            offset_east = direction * -north / tangent_length * offset_km
+            offset_north = direction * east / tangent_length * offset_km
+            waypoints.append((
+                max(-85, min(85, latitude + offset_north / 110.574)),
+                max(-180, min(180, longitude + offset_east / longitude_scale)),
+            ))
+    return waypoints
+
+
+def route_samples(route_data):
+    coordinates = route_data.get("geometry", {}).get("coordinates", [])
+    if not coordinates:
+        return []
+    return [
+        coordinate_at_route_fraction(coordinates, fraction)
+        for fraction in (0.25, 0.5, 0.75)
+    ]
+
+
+def routes_are_distinct(first_route, second_route):
+    first_samples = route_samples(first_route)
+    second_samples = route_samples(second_route)
+    if len(first_samples) != 3 or len(second_samples) != 3:
+        return False
+
+    for first, second in zip(first_samples, second_samples):
+        longitude_delta = math.radians(second[0] - first[0])
+        latitude_delta = math.radians(second[1] - first[1])
+        haversine = (
+            math.sin(latitude_delta / 2) ** 2
+            + math.cos(math.radians(first[1]))
+            * math.cos(math.radians(second[1]))
+            * math.sin(longitude_delta / 2) ** 2
+        )
+        separation_km = 2 * 6371 * math.asin(math.sqrt(min(1, haversine)))
+        if separation_km >= 10:
+            return True
+    return False
+
+
+def fetch_route_options(origin, destination):
+    """Ask OSRM for three routes, using distinct via-point routes as a fallback."""
+    origin_coordinate = f"{origin['lon']},{origin['lat']}"
+    destination_coordinate = f"{destination['lon']},{destination['lat']}"
+    route_url = f"{ROUTING_API_URL}{origin_coordinate};{destination_coordinate}"
+    response = requests.get(
+        route_url,
+        params={
+            "overview": "full",
+            "geometries": "geojson",
+            "alternatives": "3",
+            "steps": "false",
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    routing_result = response.json()
+    if routing_result.get("code") != "Ok" or not routing_result.get("routes"):
+        return []
+
+    routes = list(routing_result["routes"][:3])
+    if len(routes) == 3:
+        return routes
+
+    base_geometry = routes[0].get("geometry", {}).get("coordinates", [])
+    if not base_geometry:
+        raise RouteAlternativesUnavailable(
+            "The routing provider returned route data without usable geometry."
+        )
+
+    for offset_km in (30, 60):
+        waypoints = offset_route_waypoints(base_geometry, offset_km)
+        for pair_start in range(0, len(waypoints), 2):
+            waypoint_requests = [
+                f"{ROUTING_API_URL}{origin_coordinate};{longitude},{latitude};"
+                f"{destination_coordinate}"
+                for latitude, longitude in waypoints[pair_start:pair_start + 2]
+            ]
+            if not waypoint_requests:
+                continue
+            with ThreadPoolExecutor(max_workers=len(waypoint_requests)) as executor:
+                futures = [
+                    executor.submit(
+                        requests.get,
+                        waypoint_url,
+                        params={
+                            "overview": "full",
+                            "geometries": "geojson",
+                            "alternatives": "false",
+                            "steps": "false",
+                        },
+                        timeout=30,
+                    )
+                    for waypoint_url in waypoint_requests
+                ]
+                for future in as_completed(futures):
+                    try:
+                        candidate_response = future.result()
+                        candidate_response.raise_for_status()
+                        candidate_result = candidate_response.json()
+                    except requests.RequestException:
+                        continue
+
+                    if candidate_result.get("code") != "Ok":
+                        continue
+                    for candidate in candidate_result.get("routes", []):
+                        if all(routes_are_distinct(candidate, route) for route in routes):
+                            routes.append(candidate)
+                            break
+                    if len(routes) == 3:
+                        break
+
+            if len(routes) == 3:
+                return routes
+
+    raise RouteAlternativesUnavailable(
+        "The routing provider could not find three distinct drivable routes for this trip. "
+        "Try a different origin or destination."
+    )
+
+
 def build_route_summary(
     route_data, origin, destination, departure_time, load_weight, checkpoint_spacing, route_index
 ):
@@ -440,21 +586,10 @@ def plan_route(request):
             destination_future = executor.submit(geocode_location, destination_name)
             origin = origin_future.result()
             destination = destination_future.result()
-        route_url = (
-            f"{ROUTING_API_URL}{origin['lon']},{origin['lat']};"
-            f"{destination['lon']},{destination['lat']}"
-        )
-        response = requests.get(
-            route_url,
-            params={"overview": "full", "geometries": "geojson", "alternatives": "3", "steps": "false"},
-            timeout=30,
-        )
-        response.raise_for_status()
-        routing_result = response.json()
-        if routing_result.get("code") != "Ok" or not routing_result.get("routes"):
+        routes = fetch_route_options(origin, destination)
+        if not routes:
             return JsonResponse({"error": "No drivable routes found."}, status=422)
 
-        routes = routing_result["routes"][:3]
         with ThreadPoolExecutor(max_workers=len(routes)) as executor:
             route_summaries = list(executor.map(
                 lambda route_details: build_route_summary(
@@ -489,5 +624,7 @@ def plan_route(request):
         )
     except WeatherDataUnavailable as error:
         return JsonResponse({"error": str(error)}, status=502)
+    except RouteAlternativesUnavailable as error:
+        return JsonResponse({"error": str(error)}, status=422)
     except (KeyError, ValueError, TypeError, json.JSONDecodeError) as error:
         return JsonResponse({"error": str(error) or "Invalid request."}, status=400)

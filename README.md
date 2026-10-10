@@ -38,7 +38,7 @@ Dispatchers enter an origin, destination, departure time, cargo weight, and chec
 
 ### Highlights
 
-- **Route alternatives:** requests up to three driving routes from OSRM when alternatives are available.
+- **Three route options:** requests three routes from OSRM and, when its natural alternatives are limited, asks the routing API for additional distinct routes through offset waypoints.
 - **Weather-aware checkpoints:** samples wind, rain, and snow at configurable 10, 25, or 50 mile intervals.
 - **Arrival-time forecasts:** estimates when the truck reaches each checkpoint and uses the nearest available hourly forecast.
 - **Load-aware risk:** applies cargo-weight adjustments to the weather risk assessment.
@@ -171,7 +171,7 @@ The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing
 
 - OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
 - Weather is sampled from hourly forecast data; conditions can change between forecast hours and checkpoints.
-- Route alternatives depend on the options returned by the routing provider; some trips may have fewer than three.
+- OSRM may not be able to find three distinct drivable routes for every pair of locations. In that case, planning fails with an explanation instead of showing fewer than three options or presenting duplicate paths as alternatives.
 - This application provides decision support, not a guarantee of road safety. Follow current carrier policy, official road advisories, and applicable regulations before dispatch.
 
 ## Repository layout

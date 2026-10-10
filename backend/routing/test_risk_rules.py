@@ -13,12 +13,14 @@ from routing.views import (
     get_weather_at,
     get_weather_for_locations,
     forecast_days_for_locations,
+    fetch_route_options,
     health_check,
     plan_route,
     parse_checkpoint_spacing,
     parse_departure,
     parse_load_weight,
     parse_location_name,
+    RouteAlternativesUnavailable,
 )
 
 
@@ -285,6 +287,80 @@ class PlanRouteApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(json.loads(response.content), {"status": "ok"})
+
+    @patch("routing.views.requests.get")
+    def test_fetch_route_options_uses_distinct_via_routes_when_provider_returns_one(self, get):
+        origin = {"lat": 37.77, "lon": -122.42}
+        destination = {"lat": 34.05, "lon": -118.24}
+        base_geometry = [
+            [-122.42, 37.77],
+            [-120.3, 36.2],
+            [-118.24, 34.05],
+        ]
+
+        class RoutingResponse:
+            def __init__(self, geometry):
+                self.geometry = geometry
+
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {
+                    "code": "Ok",
+                    "routes": [{
+                        "distance": 400_000,
+                        "duration": 10_000,
+                        "geometry": {"coordinates": self.geometry},
+                    }],
+                }
+
+        def route_response(url, **kwargs):
+            coordinates = url.split("/driving/", 1)[1].split(";")
+            if len(coordinates) == 2:
+                return RoutingResponse(base_geometry)
+            waypoint = [float(value) for value in coordinates[1].split(",")]
+            return RoutingResponse([
+                [-122.42, 37.77],
+                waypoint,
+                [-118.24, 34.05],
+            ])
+
+        get.side_effect = route_response
+
+        routes = fetch_route_options(origin, destination)
+
+        self.assertEqual(len(routes), 3)
+        self.assertGreaterEqual(get.call_count, 3)
+        self.assertLessEqual(get.call_count, 13)
+
+    @patch("routing.views.requests.get")
+    def test_fetch_route_options_fails_if_it_cannot_find_three_distinct_routes(self, get):
+        class RoutingResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {
+                    "code": "Ok",
+                    "routes": [{
+                        "distance": 400_000,
+                        "duration": 10_000,
+                        "geometry": {"coordinates": [
+                            [-122.42, 37.77],
+                            [-120.3, 36.2],
+                            [-118.24, 34.05],
+                        ]},
+                    }],
+                }
+
+        get.return_value = RoutingResponse()
+
+        with self.assertRaises(RouteAlternativesUnavailable):
+            fetch_route_options(
+                {"lat": 37.77, "lon": -122.42},
+                {"lat": 34.05, "lon": -118.24},
+            )
 
     @patch("routing.views.get_weather_for_locations")
     @patch("routing.views.requests.get")
