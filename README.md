@@ -11,7 +11,7 @@ Compare driving routes using forecast weather, truck load, and travel time. Revi
   &nbsp;·&nbsp;
   <a href="https://github.com/RONIN447/northline_dispatch_ops">Source code</a>
   &nbsp;·&nbsp;
-  <a href="./docs/LOOM_SCRIPT.md">Loom walkthrough script</a>
+  
 </p>
 
 <p>
