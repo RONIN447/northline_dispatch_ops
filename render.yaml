@@ -11,7 +11,7 @@ services:
     healthCheckPath: /api/health/
     envVars:
       - key: PYTHON_VERSION
-        value: "3.9.18"
+        value: "3.14.3"
       - key: DJANGO_SETTINGS_MODULE
         value: settings
       - key: SECRET_KEY
