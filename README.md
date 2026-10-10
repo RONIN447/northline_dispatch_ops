@@ -1,87 +1,199 @@
+<div align="center">
+
 # Northline Dispatch Ops
 
-Northline Dispatch Ops compares truck routes using forecast weather, cargo weight, and travel time. Enter a start, destination, departure time, and load weight to view route alternatives, checkpoint conditions, and a safety-first recommendation.
+### Weather-aware route planning for safer freight dispatch.
 
-## Features
+Compare driving routes using forecast weather, truck load, and travel time. Review checkpoint conditions along the corridor and prioritize routes with lower exposure to severe weather.
 
-- Geocodes origin and destination with Open-Meteo Geocoding.
-- Requests up to three driving routes from OSRM.
-- Samples wind, rain, and snow at 10, 25, or 50 mile checkpoints using estimated checkpoint arrival times.
-- Applies the assessment's weather and load thresholds, then ranks routes by severe miles, high-risk miles, distance-weighted average risk, and duration.
-- Shows route alternatives, checkpoint ETAs and conditions, a risk overlay, and a 0–48 hour departure forecast control.
+<p>
+  <a href="https://northline-frontend.onrender.com/"><strong>Launch the live application</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/RONIN447/northline_dispatch_ops">Source code</a>
+</p>
 
-## Stack
+<p>
+  <a href="https://github.com/RONIN447/northline_dispatch_ops/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/RONIN447/northline_dispatch_ops/ci.yml?branch=master&label=CI" alt="CI status"></a>
+  <a href="https://northline-frontend.onrender.com/"><img src="https://img.shields.io/badge/demo-live-155f50" alt="Live demo"></a>
+  <img src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61dafb" alt="React and Vite">
+  <img src="https://img.shields.io/badge/backend-Django-092e20" alt="Django">
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+</p>
 
-- Frontend: React, Vite, Leaflet, and React Leaflet
-- Backend: Django and Python
-- Routing: OSRM public demo service
-- Geocoding and weather: Open-Meteo
+</div>
+
+<p align="center">
+  <img src="./docs/images/route-planner.png" alt="Northline Dispatch Ops route planner with origin, destination, departure, cargo weight, and checkpoint controls" width="100%">
+</p>
+
+<details>
+  <summary><strong>View a route recommendation and checkpoint forecast</strong></summary>
+  <br>
+  <img src="./docs/images/route-recommendation.png" alt="Recommended route summary with mileage, travel time, exposure rating, and checkpoint weather conditions" width="100%">
+</details>
+
+## What it does
+
+Dispatchers enter an origin, destination, departure time, cargo weight, and checkpoint interval. Northline resolves the locations, requests available driving routes, samples forecast conditions along each route, and presents a safety-first comparison.
+
+### Highlights
+
+- **Route alternatives:** requests up to three driving routes from OSRM when alternatives are available.
+- **Weather-aware checkpoints:** samples wind, rain, and snow at configurable 10, 25, or 50 mile intervals.
+- **Arrival-time forecasts:** estimates when the truck reaches each checkpoint and uses the nearest available hourly forecast.
+- **Load-aware risk:** applies cargo-weight adjustments to the weather risk assessment.
+- **Explainable recommendations:** ranks route options using severe exposure first, followed by high-risk miles, distance-weighted average risk, and duration.
+- **Interactive map:** displays route geometry, checkpoint conditions, risk overlays, and a 0-48 hour departure forecast.
+- **Fail-closed forecast handling:** reports unavailable forecast data instead of presenting missing weather as safe.
+
+### Risk assessment
+
+| Condition | Low | Moderate | High | Severe | No Travel |
+| --- | --- | --- | --- | --- | --- |
+| Wind (mph) | <25 | 25-<35 | 35-<45 | 45-<55 | >=55 |
+| Rain (in/hr) | <0.10 | 0.10-<0.25 | 0.25-<0.50 | 0.50-1.00 | >1.00 |
+| Snow (in/hr) | <0.5 | 0.5-<1.0 | 1.0-<2.0 | 2.0-3.0 | >3.0 |
+
+Additional load rules: wind from 45 to under 55 mph becomes **No Travel** above 30,000 lb; wind from 35 to under 45 mph is at least **Severe** above 40,000 lb. Wind at or above 55 mph is **No Travel** for every load.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    Dispatcher[Dispatcher] -->|trip details| Web[React + Vite planner]
+    Web -->|POST /api/plan/| API[Django route API]
+    API -->|geocode| Geo[Open-Meteo Geocoding]
+    API -->|driving alternatives| OSRM[OSRM]
+    API -->|checkpoint forecasts| Weather[Open-Meteo Forecast]
+    API -->|ranked routes + weather| Web
+    Web -->|route and risk layers| Map[Leaflet map]
+```
+
+| Layer | Implementation |
+| --- | --- |
+| Frontend | React 18, Vite, Leaflet, React Leaflet, Lucide |
+| Backend | Python, Django, Requests |
+| Route provider | OSRM public routing service |
+| Geocoding and weather | Open-Meteo APIs |
+| Hosting | Render static site and web service |
 
 ## Run locally
 
-Requirements: Python 3.9 or newer and Node.js 18 or newer.
+### Prerequisites
 
-### Backend
+- Python 3.9 or newer
+- Node.js 18 or newer
+- npm
+
+### 1. Start the backend
+
+In PowerShell from the repository root:
 
 ```powershell
 cd backend
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-$env:DJANGO_SETTINGS_MODULE='settings'
-$env:DEBUG='True'
+$env:DJANGO_SETTINGS_MODULE = "settings"
+$env:DEBUG = "True"
 python -m django runserver 8000
 ```
 
-### Frontend
+The API is available at `http://127.0.0.1:8000`. The backend health endpoint is `http://127.0.0.1:8000/api/health/`.
 
-In a second terminal:
+### 2. Start the frontend
+
+In a second PowerShell window from the repository root:
 
 ```powershell
 cd frontend
-npm install
-$env:VITE_API_BASE_URL='http://127.0.0.1:8000'
+npm ci
+$env:VITE_API_BASE_URL = "http://127.0.0.1:8000"
 npm run dev
 ```
 
-Open the Vite URL, normally `http://localhost:5173`. The backend permits that local origin for development. `.env.example` lists the supported environment variables.
+Open the Vite URL shown in the terminal, normally `http://localhost:5173`.
 
-## Risk rules
+Environment variable examples are documented in [`.env.example`](./.env.example). Do not commit production secrets or a populated `.env` file.
 
-| Condition | Low | Moderate | High | Severe | No Travel |
-| --- | --- | --- | --- | --- | --- |
-| Wind (mph) | <25 | 25–34 | 35–44 | 45–54 | ≥55 |
-| Rain (in/hr) | <0.10 | 0.10–<0.25 | 0.25–<0.50 | 0.50–1.00 | >1.00 |
-| Snow (in/hr) | <0.5 | 0.5–<1.0 | 1.0–<2.0 | 2.0–3.0 | >3.0 |
+## API
 
-Load adjustments:
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health/` | Render health check; returns `{"status":"ok"}` |
+| `POST` | `/api/plan/` | Geocode locations, score available routes, and return the recommendation |
 
-- Wind at or above 55 mph is No Travel for any load.
-- Wind from 45 to under 55 mph is No Travel above 30,000 lb.
-- Wind from 35 to under 45 mph is at least Severe above 40,000 lb.
+Example request:
 
-## Deploy on Render
+```json
+{
+  "origin": "San Francisco, CA",
+  "destination": "Los Angeles, CA",
+  "departure": "2026-10-10T12:00:00Z",
+  "loadWeight": "28000",
+  "intervalMiles": "25"
+}
+```
 
-The repository includes a Render Blueprint in `render.yaml` for a Django web service and a static frontend. In Render, create a Blueprint instance from the GitHub repository and review the generated services before applying it. Set the frontend's deployed URL as `FRONTEND_URL` and `CORS_ALLOWED_ORIGINS` on the backend, and set the backend URL as `VITE_API_BASE_URL` for the frontend build. Keep `SECRET_KEY` private and set `DEBUG=False` in production.
+The plan response includes the resolved endpoints, available route geometries, checkpoint ETAs and forecast conditions, risk summaries, and `recommendedRouteId`. Invalid input returns a client error with an explanatory message; unavailable forecast data is not silently classified as safe.
 
-The backend start command is `gunicorn wsgi:application` from the `backend` directory. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for details.
+## Tests and build
 
-## Limitations
+Run the backend regression tests:
 
-- Public OSRM and Open-Meteo services are demonstration providers with availability and rate limits outside this project's control.
-- Weather is hourly forecast data sampled at the nearest available hour. If a checkpoint falls outside the available forecast, the app reports the forecast as unavailable rather than treating it as safe.
-- Route alternatives depend on what the routing provider returns; fewer than three may be available for some trips.
-- The recommendation is decision support and should be checked against current road and carrier safety guidance before dispatch.
+```powershell
+cd backend
+python -m unittest routing.test_risk_rules
+```
 
-## Project layout
+Build the frontend for production:
 
-- `backend/routing/views.py` — geocoding, route retrieval, weather sampling, risk scoring, and ranking
-- `backend/routing/test_risk_rules.py` — focused risk and input regression tests
-- `frontend/src/main.jsx` — route planner, forecast control, route cards, and map
-- `frontend/src/style.css` — responsive interface styling
-- `docs/DEPLOYMENT.md` — local and hosted deployment notes
-- `docs/LOOM_SCRIPT.md` — walkthrough outline
+```powershell
+cd frontend
+npm ci
+npm run build
+```
+
+GitHub Actions runs the backend tests on Python 3.9 and 3.14 and verifies a production frontend build on pushes and pull requests.
+
+## Deployment
+
+The live application is hosted on Render:
+
+- **Frontend:** [northline-frontend.onrender.com](https://northline-frontend.onrender.com/)
+- **Backend health:** [northline-backend-wvdw.onrender.com/api/health/](https://northline-backend-wvdw.onrender.com/api/health/)
+
+The root [`render.yaml`](./render.yaml) defines both services. Create or update the Render Blueprint from this repository to provision the static frontend and Django backend. Keep `SECRET_KEY` in Render's environment settings, set `DEBUG=False`, and use the deployed frontend origin for the backend's `FRONTEND_URL` and `CORS_ALLOWED_ORIGINS`.
+
+The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing that value. See the [deployment guide](./docs/DEPLOYMENT.md) for configuration details. The free backend instance may spin down while idle, so its first request after inactivity can take longer.
+
+## Limitations and safety
+
+- OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
+- Weather is sampled from hourly forecast data; conditions can change between forecast hours and checkpoints.
+- Route alternatives depend on the options returned by the routing provider; some trips may have fewer than three.
+- This application provides decision support, not a guarantee of road safety. Follow current carrier policy, official road advisories, and applicable regulations before dispatch.
+
+## Repository layout
+
+```text
+backend/
+  routing/
+    test_risk_rules.py   # Risk thresholds, forecast handling, API regressions
+    views.py             # Geocoding, routing, weather sampling, scoring
+  settings.py
+  urls.py
+  wsgi.py
+docs/
+  images/                # Live application screenshots
+  DEPLOYMENT.md
+  LOOM_SCRIPT.md
+frontend/
+  src/main.jsx           # Route planner, map, forecast, recommendations
+  src/style.css
+render.yaml              # Render Blueprint for frontend and backend
+```
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Distributed under the MIT License. See [`LICENSE`](./LICENSE).
