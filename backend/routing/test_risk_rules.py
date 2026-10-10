@@ -13,6 +13,7 @@ from routing.views import (
     get_weather_at,
     get_weather_for_locations,
     forecast_days_for_locations,
+    health_check,
     plan_route,
     parse_checkpoint_spacing,
     parse_departure,
@@ -278,6 +279,12 @@ class PlanRouteApiTests(unittest.TestCase):
             "loadWeight": "28000",
             "intervalMiles": "25",
         }
+
+    def test_health_check_returns_ok(self):
+        response = health_check(self.factory.get("/api/health/"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content), {"status": "ok"})
 
     @patch("routing.views.get_weather_for_locations")
     @patch("routing.views.requests.get")

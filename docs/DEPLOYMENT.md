@@ -45,7 +45,7 @@ After Render creates the services, set the following values using the actual ser
 
 Set `VITE_API_BASE_URL` to the backend's complete `https://` URL, then trigger a new frontend deploy because Vite reads this value at build time.
 
-The backend service runs from the `backend` root and starts with `gunicorn wsgi:application`. The frontend service builds with `npm install` and `npm run build`, and publishes `dist`.
+The backend service runs from the `backend` root, starts with `gunicorn wsgi:application`, and uses `/api/health/` for health checks. The frontend service builds with `npm install` and `npm run build`, and publishes `dist`.
 
 ## Other hosting providers
 

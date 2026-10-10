@@ -60,6 +60,10 @@ class WeatherDataUnavailable(Exception):
     """Raised when a checkpoint cannot be matched to a real forecast value."""
 
 
+def health_check(request):
+    return JsonResponse({"status": "ok"})
+
+
 def parse_departure(value):
     """Normalize arbitrary ISO timestamps from browsers or external clients."""
     if isinstance(value, datetime):

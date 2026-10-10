@@ -8,8 +8,12 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+render_hostname = os.getenv("RENDER_EXTERNAL_HOSTNAME")
+if render_hostname:
+    ALLOWED_HOSTS.append(render_hostname)
+
 if not DEBUG:
-    ALLOWED_HOSTS.extend(["*.onrender.com", "localhost", "127.0.0.1"])
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1"])
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
 CSRF_TRUSTED_ORIGINS = [
