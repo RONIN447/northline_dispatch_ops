@@ -10,8 +10,6 @@ Compare driving routes using forecast weather, truck load, and travel time. Revi
   <a href="https://northline-frontend.onrender.com/"><strong>Launch the live application</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/RONIN447/northline_dispatch_ops">Source code</a>
-  &nbsp;·&nbsp;
-  
 </p>
 
 <p>
@@ -25,13 +23,13 @@ Compare driving routes using forecast weather, truck load, and travel time. Revi
 </div>
 
 <p align="center">
-  <img src="./docs/images/route-planner.png" alt="Northline Dispatch Ops route planner with origin, destination, departure, cargo weight, and checkpoint controls" width="100%">
+  <img src="./docs/images/route-planner.png" alt="Northline Dispatch Ops planner dashboard with trip inputs, corridor map, and route options" width="100%">
 </p>
 
 <details>
   <summary><strong>View a route recommendation and checkpoint forecast</strong></summary>
   <br>
-  <img src="./docs/images/route-recommendation.png" alt="Recommended route summary with mileage, travel time, exposure rating, and checkpoint weather conditions" width="100%">
+  <img src="./docs/images/route-recommendation.png" alt="Boston to New York route recommendation with three route options, a corridor map, and checkpoint conditions" width="100%">
 </details>
 
 ## What it does
