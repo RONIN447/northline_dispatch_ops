@@ -728,7 +728,7 @@ body {
   }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1100px) {
   .app-shell {
     height:auto;
     min-height:100vh;
