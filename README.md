@@ -10,7 +10,7 @@ Compare driving routes using forecast weather, truck load, and travel time. Revi
   <a href="https://northline-frontend.onrender.com/"><strong>Launch the live application</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/RONIN447/northline_dispatch_ops">Source code</a>
-  &nbsp;·&nbsp;
+  &nbsp;
   
 </p>
 
