@@ -399,7 +399,7 @@ function RoutePlanner({ formValues, onFieldChange, onSubmit, isLoading, errorMes
   return (
     <aside className="sidebar">
       <div className="eyebrow">ROUTE PLANNER</div>
-      <h1>Map the safest <br />route ahead.</h1>
+      <h1>Map the safest<br />route ahead.</h1>
       <p className="intro">Compare weather exposure and lead time before dispatching the load.</p>
 
       <form onSubmit={onSubmit} className="planner-form">
