@@ -554,13 +554,16 @@ body {
 .route-list {
   padding:8px 12px 3px;
   display:grid;
+  grid-template-columns:minmax(0,1fr);
   gap:7px;
-  overflow-y:auto;
-  max-height:248px;
+  overflow:visible;
+  max-height:none;
+  min-width:0;
   flex-shrink:0
 }
 .route-card {
   width:100%;
+  min-width:0;
   text-align:left;
   border:1px solid #e8ece9;
   border-radius:7px;
@@ -577,7 +580,8 @@ body {
 .route-card-top {
   display:flex;
   align-items:center;
-  gap:7px
+  gap:7px;
+  min-width:0
 }
 .route-num {
   font:500 9px 'DM Mono';
@@ -585,7 +589,8 @@ body {
 }
 .route-title {
   font:600 10px 'DM Sans';
-  flex:1
+  flex:1;
+  min-width:0
 }
 .best-tag {
   color:#1f755d;
@@ -617,6 +622,8 @@ body {
 .route-meta {
   display:flex;
   justify-content:space-between;
+  flex-wrap:wrap;
+  gap:4px 8px;
   font:9px 'DM Sans';
   color:#86958f
 }
@@ -631,9 +638,7 @@ body {
   padding-top:6px;
   color:#9aa6a1;
   font:8px 'DM Mono';
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis
+  overflow-wrap:anywhere
 }
 .checkpoint-heading {
   display:flex;
@@ -771,9 +776,14 @@ body {
   }
   .route-list {
     max-height:none;
+    overflow:visible;
+    padding-right:12px;
+    padding-left:12px;
   }
   .checkpoint-list {
-    max-height:330px;
+    max-height:none;
+    overflow:visible;
+    flex:none;
   }
 }
 

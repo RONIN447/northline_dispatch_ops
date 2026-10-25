@@ -1,0 +1,18 @@
+﻿{
+  "name": "northline-backend",
+  "repo": "https://github.com/RONIN447/northline_dispatch_ops",
+  "branch": "master",
+  "type": "web_service",
+  "region": "oregon",
+  "plan": "free",
+  "autoDeploy": true,
+  "rootDir": "backend",
+  "serviceDetails": {
+    "env": "python",
+    "runtime": "python",
+    "buildCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+    "startCommand": "gunicorn wsgi:application --bind 0.0.0.0:$PORT",
+    "plan": "free",
+    "healthCheckPath": "/"
+  }
+}
