@@ -61,3 +61,24 @@ class BriefingRoutePlan(BaseModel):
         if not any(route.id == self.recommendedRouteId for route in self.routes):
             raise ValueError("recommendedRouteId must match a route in routes")
         return self
+
+
+class RiskyCheckpoint(BaseModel):
+    route_id: str
+    checkpoint_index: int
+    level: str
+
+    @field_validator("level")
+    @classmethod
+    def validate_level(cls, value: str) -> str:
+        if value not in RISK_LEVELS:
+            raise ValueError(f"Level must be one of: {', '.join(RISK_LEVELS)}")
+        return value
+
+
+class Briefing(BaseModel):
+    recommended_route_id: str
+    summary: str
+    risky_checkpoints: List[RiskyCheckpoint]
+    data_gaps: List[str]
+    dispatcher_actions: List[str]

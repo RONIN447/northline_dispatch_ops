@@ -148,6 +148,32 @@ python -m unittest routing.test_risk_rules briefing.tests
 The briefing tests validate the captured route-plan responses against the
 Python 3.9-compatible Pydantic models.
 
+### Briefing providers
+
+The briefing provider interface accepts a system instruction and a JSON-encoded
+`/api/plan/` response, and returns generated text, token usage, and latency.
+It defaults to the deterministic mock provider:
+
+```powershell
+$env:LLM_PROVIDER = "mock"
+$env:MOCK_MODE = "normal" # faulty, faulty_downgrade, faulty_no_gap exercise checks
+```
+
+Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
+`LLM_PROVIDER=openai` with `OPENAI_API_KEY` and `OPENAI_MODEL`, to call a hosted
+model. SDK imports are lazy, and provider requests have a 30-second timeout.
+
+`briefing.service.generate_briefing(plan)` sends only route summaries and
+checkpoint weather/risk data (not route geometry), bounds location labels, and
+delimits the plan as untrusted data. It validates the response against the
+`Briefing` schema and retries once with the parse/validation error if needed.
+Provider API failures raise a separate request error; output validation failure
+after retry raises a generation error. Hosted requests use temperature 0 and a
+1,200-token output cap. The service returns the validated briefing and provider,
+prompt, token, latency, and retry metadata. The system prompt is versioned as
+`v1`; behavioral safety checks are implemented separately from this generation
+step.
+
 Build the frontend for production:
 
 ```powershell
