@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import time
 from dataclasses import dataclass
 from typing import Optional, Protocol
@@ -18,6 +19,12 @@ class ProviderResponse:
     text: str
     tokens: int
     latency_ms: float
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+
+
+class ProviderRequestError(RuntimeError):
+    """Raised when a hosted provider request fails."""
 
 
 class Provider(Protocol):
@@ -40,10 +47,14 @@ class MockProvider:
             )
 
     def generate(self, system: str, user: str) -> ProviderResponse:
-        del system
         started = time.perf_counter()
         try:
-            request_data = json.loads(user)
+            match = re.search(
+                r"(?s)^.*?BEGIN_UNTRUSTED_ROUTE_PLAN_DATA\n(.*?)\n"
+                r"END_UNTRUSTED_ROUTE_PLAN_DATA.*$",
+                user,
+            )
+            request_data = json.loads(match.group(1) if match else user)
         except (TypeError, json.JSONDecodeError) as error:
             raise ValueError("Mock provider input must be a JSON route plan.") from error
         route_plan = request_data.get("plan", request_data)
@@ -57,8 +68,10 @@ class MockProvider:
         text = briefing.model_dump_json()
         return ProviderResponse(
             text=text,
-            tokens=len(text.split()),
+            tokens=len(system.split()) + len(user.split()) + len(text.split()),
             latency_ms=(time.perf_counter() - started) * 1000,
+            input_tokens=len(system.split()) + len(user.split()),
+            output_tokens=len(text.split()),
         )
 
     @staticmethod
@@ -170,6 +183,7 @@ class AnthropicProvider:
             import anthropic
         except ImportError as error:
             raise RuntimeError("Install the anthropic package to use this provider.") from error
+        self._api_error_type = anthropic.APIError
         self._client = anthropic.Anthropic(
             api_key=api_key,
             timeout=PROVIDER_TIMEOUT_SECONDS,
@@ -177,17 +191,28 @@ class AnthropicProvider:
 
     def generate(self, system: str, user: str) -> ProviderResponse:
         started = time.perf_counter()
-        response = self._client.messages.create(
-            model=self._model,
-            max_tokens=1200,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-        )
+        try:
+            response = self._client.messages.create(
+                model=self._model,
+                max_tokens=1200,
+                temperature=0,
+                system=system,
+                messages=[{"role": "user", "content": user}],
+            )
+        except self._api_error_type as error:
+            raise ProviderRequestError("Anthropic briefing request failed.") from error
         text = "".join(
             block.text for block in response.content if getattr(block, "type", None) == "text"
         )
-        tokens = response.usage.input_tokens + response.usage.output_tokens
-        return ProviderResponse(text, tokens, (time.perf_counter() - started) * 1000)
+        input_tokens = response.usage.input_tokens
+        output_tokens = response.usage.output_tokens
+        return ProviderResponse(
+            text,
+            input_tokens + output_tokens,
+            (time.perf_counter() - started) * 1000,
+            input_tokens,
+            output_tokens,
+        )
 
 
 class OpenAIProvider:
@@ -199,9 +224,10 @@ class OpenAIProvider:
         if not self._model:
             raise ValueError("OPENAI_MODEL is required for the OpenAI provider.")
         try:
-            from openai import OpenAI
+            from openai import APIError, OpenAI
         except ImportError as error:
             raise RuntimeError("Install the openai package to use this provider.") from error
+        self._api_error_type = APIError
         self._client = OpenAI(
             api_key=api_key,
             timeout=PROVIDER_TIMEOUT_SECONDS,
@@ -209,17 +235,29 @@ class OpenAIProvider:
 
     def generate(self, system: str, user: str) -> ProviderResponse:
         started = time.perf_counter()
-        response = self._client.chat.completions.create(
-            model=self._model,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            response_format={"type": "json_object"},
-        )
+        try:
+            response = self._client.chat.completions.create(
+                model=self._model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                response_format={"type": "json_object"},
+                temperature=0,
+                max_tokens=1200,
+            )
+        except self._api_error_type as error:
+            raise ProviderRequestError("OpenAI briefing request failed.") from error
         text = response.choices[0].message.content or ""
-        tokens = response.usage.total_tokens if response.usage else 0
-        return ProviderResponse(text, tokens, (time.perf_counter() - started) * 1000)
+        input_tokens = response.usage.prompt_tokens if response.usage else 0
+        output_tokens = response.usage.completion_tokens if response.usage else 0
+        return ProviderResponse(
+            text,
+            input_tokens + output_tokens,
+            (time.perf_counter() - started) * 1000,
+            input_tokens,
+            output_tokens,
+        )
 
 
 def get_provider(name: Optional[str] = None) -> Provider:
