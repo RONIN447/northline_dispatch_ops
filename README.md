@@ -156,7 +156,8 @@ It defaults to the deterministic mock provider:
 
 ```powershell
 $env:LLM_PROVIDER = "mock"
-$env:MOCK_MODE = "normal" # faulty, faulty_downgrade, faulty_no_gap exercise checks
+$env:MOCK_MODE = "normal" # faulty_route, faulty_missing_checkpoint, faulty_number,
+                          # faulty_downgrade, faulty_no_gap each exercise one check
 ```
 
 Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
@@ -173,6 +174,12 @@ after retry raises a generation error. Hosted requests use temperature 0 and a
 prompt, token, latency, and retry metadata. The system prompt is versioned as
 `v1`; behavioral safety checks are implemented separately from this generation
 step.
+
+`briefing.validator.enforce(plan, briefing)` applies deterministic safety
+corrections and returns `(final_briefing, interventions, fallback_used)`.
+Count interventions by `rule` and `fallback_used` to track how often generated
+text must be replaced; the validator verifies its result with the shared
+evaluation checks before returning.
 
 Build the frontend for production:
 

@@ -1,5 +1,6 @@
 import json
 import os
+from copy import deepcopy
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -13,8 +14,9 @@ from briefing.providers import (
     get_provider,
 )
 from briefing.prompt import SYSTEM_PROMPT
-from briefing.schema import Briefing, BriefingRoutePlan
+from briefing.schema import Briefing, BriefingRoutePlan, RiskyCheckpoint
 from briefing.service import BriefingGenerationError, generate_briefing
+from briefing.validator import enforce
 from evals.checks import validate_briefing
 from routing.risk_levels import RISK_LEVELS
 
@@ -355,3 +357,192 @@ class BriefingServiceTests(unittest.TestCase):
                 generate_briefing(self.route_plan)
 
         self.assertEqual(provider.calls, 2)
+
+
+class BriefingValidatorTests(unittest.TestCase):
+    def setUp(self):
+        response_file = (
+            Path(__file__).resolve().parents[1]
+            / "evals"
+            / "scenarios"
+            / "raw"
+            / "01_sfo_to_lax.response.json"
+        )
+        self.route_plan = json.loads(response_file.read_text(encoding="utf-8"))
+        recommended = next(
+            route
+            for route in self.route_plan["routes"]
+            if route["id"] == self.route_plan["recommendedRouteId"]
+        )
+        recommended["checkpoints"][0]["risk"] = "Severe"
+
+    def test_rule_1_restores_recommended_route_without_mutating_inputs(self):
+        briefing = self._mock_briefing()
+        briefing.recommended_route_id = "route-not-in-plan"
+        briefing_before = briefing.model_dump()
+        plan_before = deepcopy(self.route_plan)
+
+        final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+        self.assertEqual(final.recommended_route_id, self.route_plan["recommendedRouteId"])
+        self.assertIn("canonical_recommended_route", self._rules(interventions))
+        self.assertFalse(fallback_used)
+        self.assertEqual(briefing.model_dump(), briefing_before)
+        self.assertEqual(self.route_plan, plan_before)
+        self.assertEqual(validate_briefing(final, self.route_plan), [])
+
+    def test_rule_2_restores_unavailable_weather_gaps(self):
+        checkpoint = self.route_plan["routes"][0]["checkpoints"][0]
+        checkpoint.pop("windMph")
+        briefing = self._mock_briefing()
+        briefing.data_gaps = []
+
+        final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+        self.assertTrue(final.data_gaps)
+        self.assertIn("restore_data_gaps", self._rules(interventions))
+        self.assertFalse(fallback_used)
+        self.assertEqual(validate_briefing(final, self.route_plan), [])
+
+    def test_rule_3_restores_downgraded_risk_and_removes_unknown_checkpoint(self):
+        briefing = self._mock_briefing()
+        severe = next(item for item in briefing.risky_checkpoints if item.level == "Severe")
+        severe.level = "Moderate"
+        briefing.risky_checkpoints.append(
+            RiskyCheckpoint(
+                route_id="route-not-in-plan",
+                checkpoint_index=0,
+                level="High",
+            )
+        )
+
+        final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+        restored = next(
+            item
+            for item in final.risky_checkpoints
+            if item.route_id == severe.route_id
+            and item.checkpoint_index == severe.checkpoint_index
+        )
+        self.assertEqual(restored.level, "Severe")
+        self.assertNotIn("route-not-in-plan", [item.route_id for item in final.risky_checkpoints])
+        self.assertIn("restore_downgraded_risk", self._rules(interventions))
+        self.assertIn("remove_unexpected_risky_checkpoint", self._rules(interventions))
+        self.assertFalse(fallback_used)
+        self.assertEqual(validate_briefing(final, self.route_plan), [])
+
+    def test_rule_4_adds_omitted_severe_checkpoint(self):
+        briefing = self._mock_briefing()
+        briefing.risky_checkpoints = [
+            item for item in briefing.risky_checkpoints if item.level != "Severe"
+        ]
+
+        final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+        self.assertTrue(any(item.level == "Severe" for item in final.risky_checkpoints))
+        self.assertIn("add_required_risky_checkpoint", self._rules(interventions))
+        self.assertFalse(fallback_used)
+        self.assertEqual(validate_briefing(final, self.route_plan), [])
+
+    def test_rule_5_falls_back_for_unsupported_numbers_and_route_ids(self):
+        briefing = self._mock_briefing()
+        briefing.summary += " Dispatch after 999 hours via route-unknown."
+
+        final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+        self.assertIn("fallback_template", self._rules(interventions))
+        self.assertTrue(fallback_used)
+        self.assertNotIn("999", final.summary)
+        self.assertNotIn("route-unknown", final.summary)
+        self.assertEqual(validate_briefing(final, self.route_plan), [])
+
+    def test_each_faulty_mode_fails_its_expected_check_then_is_repaired(self):
+        checkpoint = self.route_plan["routes"][0]["checkpoints"][0]
+        checkpoint.pop("windMph")
+        expected_errors = {
+            "faulty_route": "recommended_route_mismatch",
+            "faulty_missing_checkpoint": "risky_checkpoint_mismatch",
+            "faulty_number": "unsupported_number",
+            "faulty_downgrade": "risky_checkpoint_mismatch",
+            "faulty_no_gap": "data_gap_mismatch",
+        }
+        for mode, expected_error in expected_errors.items():
+            with self.subTest(mode=mode):
+                response = MockProvider(mode=mode).generate(
+                    "Return briefing JSON.", json.dumps(self.route_plan)
+                )
+                briefing = Briefing.model_validate_json(response.text)
+                raw_errors = validate_briefing(briefing, self.route_plan)
+                self.assertIn(expected_error, raw_errors)
+
+                final, interventions, fallback_used = enforce(self.route_plan, briefing)
+
+                self.assertEqual(validate_briefing(final, self.route_plan), [])
+                self.assertEqual(fallback_used, mode == "faulty_number")
+                second, second_interventions, second_fallback_used = enforce(
+                    self.route_plan, final
+                )
+                self.assertEqual(second_interventions, [])
+                self.assertFalse(second_fallback_used)
+                self.assertEqual(second.model_dump(), final.model_dump())
+                self.assertEqual("fallback_template" in self._rules(interventions), fallback_used)
+                self.assertTrue(
+                    all(
+                        hasattr(item, "rule") and hasattr(item, "detail")
+                        for item in interventions
+                    )
+                )
+
+    def test_validator_passes_all_captured_scenarios(self):
+        raw_responses = Path(__file__).resolve().parents[1] / "evals" / "scenarios" / "raw"
+        for response_file in sorted(raw_responses.glob("*.response.json")):
+            with self.subTest(scenario=response_file.name):
+                plan = json.loads(response_file.read_text(encoding="utf-8"))
+                response = MockProvider(mode="normal").generate(
+                    "Return briefing JSON.", json.dumps(plan)
+                )
+                briefing = Briefing.model_validate_json(response.text)
+
+                final, interventions, fallback_used = enforce(plan, briefing)
+
+                self.assertEqual(validate_briefing(final, plan), [])
+                self.assertFalse(fallback_used)
+                self.assertNotIn(
+                    "fallback_template",
+                    self._rules(interventions),
+                )
+
+    def test_fallback_template_passes_with_all_routes_risky_and_weather_gaps(self):
+        plan = deepcopy(self.route_plan)
+        for route in plan["routes"]:
+            for checkpoint in route["checkpoints"]:
+                checkpoint["risk"] = "No Travel"
+                checkpoint.pop("windMph", None)
+                checkpoint.pop("rainInHr", None)
+                checkpoint.pop("snowInHr", None)
+        briefing = self._mock_briefing_for(plan)
+        briefing.summary += " Unverified delay 999 hours."
+
+        final, interventions, fallback_used = enforce(plan, briefing)
+
+        self.assertTrue(fallback_used)
+        self.assertIn("fallback_template", self._rules(interventions))
+        self.assertEqual(
+            len(final.risky_checkpoints),
+            sum(len(route["checkpoints"]) for route in plan["routes"]),
+        )
+        self.assertEqual(validate_briefing(final, plan), [])
+
+    def _mock_briefing(self, mode="normal"):
+        return self._mock_briefing_for(self.route_plan, mode)
+
+    @staticmethod
+    def _mock_briefing_for(plan, mode="normal"):
+        response = MockProvider(mode=mode).generate(
+            "Return briefing JSON.", json.dumps(plan)
+        )
+        return Briefing.model_validate_json(response.text)
+
+    @staticmethod
+    def _rules(interventions):
+        return {item.rule for item in interventions}

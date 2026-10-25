@@ -2,12 +2,13 @@
 
 import re
 from decimal import Decimal, InvalidOperation
-from typing import List, Set
+from typing import List, Set, Tuple
 
 from briefing.schema import Briefing
 from routing.risk_levels import HIGH, RISK_SCORES
 
 _NUMBER_PATTERN = re.compile(r"(?<![A-Za-z-])\d[\d,]*(?:\.\d+)?")
+_ROUTE_ID_PATTERN = re.compile(r"\broute-[A-Za-z0-9_-]+\b")
 _WEATHER_FIELDS = ("windMph", "rainInHr", "snowInHr")
 
 
@@ -24,20 +25,8 @@ def validate_briefing(briefing: Briefing, route_plan: dict) -> List[str]:
     ):
         errors.append("recommended_route_mismatch")
 
-    expected_risks = set()
-    expected_gaps = set()
-    for route in routes:
-        for index, checkpoint in enumerate(route["checkpoints"]):
-            risk = checkpoint.get("risk")
-            if risk in RISK_SCORES and RISK_SCORES[risk] >= RISK_SCORES[HIGH]:
-                expected_risks.add((route["id"], index, risk))
-            missing = [field for field in _WEATHER_FIELDS if checkpoint.get(field) is None]
-            if missing:
-                expected_gaps.add(
-                    "{} checkpoint {} is missing {}.".format(
-                        route["id"], index, ", ".join(missing)
-                    )
-                )
+    expected_risks = set(expected_risky_checkpoints(route_plan))
+    expected_gaps = set(expected_data_gaps(route_plan))
 
     actual_risks = {
         (item.route_id, item.checkpoint_index, item.level)
@@ -52,6 +41,15 @@ def validate_briefing(briefing: Briefing, route_plan: dict) -> List[str]:
 
     allowed_numbers = _route_plan_numbers(route_plan)
     claims = "{} {}".format(briefing.summary, " ".join(briefing.dispatcher_actions))
+    allowed_route_ids = {route["id"] for route in routes}
+    unsupported_route_ids = {
+        match.group()
+        for match in _ROUTE_ID_PATTERN.finditer(claims)
+        if match.group() not in allowed_route_ids
+    }
+    if unsupported_route_ids:
+        errors.append("unsupported_route_id")
+
     for match in _NUMBER_PATTERN.finditer(claims):
         try:
             number = Decimal(match.group().replace(",", "")).normalize()
@@ -61,6 +59,32 @@ def validate_briefing(briefing: Briefing, route_plan: dict) -> List[str]:
             errors.append("unsupported_number")
             break
     return errors
+
+
+def expected_risky_checkpoints(route_plan: dict) -> List[Tuple[str, int, str]]:
+    """Return all engine-rated High-or-higher checkpoints in plan order."""
+    expected = []
+    for route in route_plan["routes"]:
+        for index, checkpoint in enumerate(route["checkpoints"]):
+            risk = checkpoint.get("risk")
+            if risk in RISK_SCORES and RISK_SCORES[risk] >= RISK_SCORES[HIGH]:
+                expected.append((route["id"], index, risk))
+    return expected
+
+
+def expected_data_gaps(route_plan: dict) -> List[str]:
+    """Return canonical gap descriptions for missing checkpoint weather fields."""
+    expected = []
+    for route in route_plan["routes"]:
+        for index, checkpoint in enumerate(route["checkpoints"]):
+            missing = [field for field in _WEATHER_FIELDS if checkpoint.get(field) is None]
+            if missing:
+                expected.append(
+                    "{} checkpoint {} is missing {}.".format(
+                        route["id"], index, ", ".join(missing)
+                    )
+                )
+    return expected
 
 
 def _route_plan_numbers(route_plan: dict) -> Set[Decimal]:

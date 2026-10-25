@@ -38,12 +38,16 @@ class MockProvider:
         if self.mode not in {
             "normal",
             "faulty",
+            "faulty_route",
+            "faulty_missing_checkpoint",
+            "faulty_number",
             "faulty_downgrade",
             "faulty_no_gap",
         }:
             raise ValueError(
-                "MOCK_MODE must be 'normal', 'faulty', 'faulty_downgrade', "
-                "or 'faulty_no_gap'."
+                "MOCK_MODE must be 'normal', 'faulty', 'faulty_route', "
+                "'faulty_missing_checkpoint', 'faulty_number', "
+                "'faulty_downgrade', or 'faulty_no_gap'."
             )
 
     def generate(self, system: str, user: str) -> ProviderResponse:
@@ -59,9 +63,13 @@ class MockProvider:
             raise ValueError("Mock provider input must be a JSON route plan.") from error
         route_plan = request_data.get("plan", request_data)
         briefing = self._build_briefing(route_plan)
-        if self.mode == "faulty":
-            briefing = self._make_faulty(briefing, route_plan)
-        elif self.mode == "faulty_downgrade":
+        if self.mode in {"faulty", "faulty_route"}:
+            self._make_faulty_route(briefing, route_plan)
+        if self.mode in {"faulty", "faulty_missing_checkpoint"}:
+            self._make_faulty_missing_checkpoint(briefing)
+        if self.mode in {"faulty", "faulty_number"}:
+            self._make_faulty_number(briefing)
+        if self.mode == "faulty_downgrade":
             briefing = self._make_faulty_downgrade(briefing)
         elif self.mode == "faulty_no_gap":
             briefing.data_gaps = []
@@ -142,7 +150,7 @@ class MockProvider:
         )
 
     @staticmethod
-    def _make_faulty(briefing: Briefing, route_plan: dict) -> Briefing:
+    def _make_faulty_route(briefing: Briefing, route_plan: dict) -> None:
         route_ids = [route["id"] for route in route_plan["routes"]]
         wrong_route = next(
             (route_id for route_id in route_ids if route_id != briefing.recommended_route_id),
@@ -150,14 +158,18 @@ class MockProvider:
         )
         briefing.recommended_route_id = wrong_route
 
+    @staticmethod
+    def _make_faulty_missing_checkpoint(briefing: Briefing) -> None:
         target_risk = SEVERE
         if not any(item.level == SEVERE for item in briefing.risky_checkpoints):
             target_risk = NO_TRAVEL
         briefing.risky_checkpoints = [
             item for item in briefing.risky_checkpoints if item.level != target_risk
         ]
+
+    @staticmethod
+    def _make_faulty_number(briefing: Briefing) -> None:
         briefing.summary += " Estimated delay: 999 hours."
-        return briefing
 
     @staticmethod
     def _make_faulty_downgrade(briefing: Briefing) -> Briefing:
