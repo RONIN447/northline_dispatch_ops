@@ -23,6 +23,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 ROOT_URLCONF = "urls"
-INSTALLED_APPS = ["django.contrib.contenttypes", "routing"]
+INSTALLED_APPS = ["django.contrib.contenttypes", "routing", "briefing"]
 MIDDLEWARE = ["cors.CorsMiddleware", "django.middleware.common.CommonMiddleware"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

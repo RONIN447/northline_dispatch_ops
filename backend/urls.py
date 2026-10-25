@@ -8,4 +8,5 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
 urlpatterns = [
     path("", RedirectView.as_view(url=FRONTEND_URL.rstrip("/") + "/"), name="root-redirect"),
     path("api/", include("routing.urls")),
+    path("api/briefing/", include("briefing.urls")),
 ]

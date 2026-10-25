@@ -8,6 +8,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from functools import lru_cache
 
+from .risk_levels import HIGH, LOW, MODERATE, NO_TRAVEL, RISK_SCORES, SEVERE
+
 try:
     import importlib
 
@@ -51,9 +53,6 @@ ROUTING_API_URL = "https://router.project-osrm.org/route/v1/driving/"
 GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search"
 WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast"
 
-# Every checkpoint carries a risk grade. This dictionary makes it easy to compare
-# and rank routes by severity in a predictable, operationally meaningful order.
-RISK_SCORES = {"Low": 0, "Moderate": 1, "High": 2, "Severe": 3, "No Travel": 4}
 MILES_PER_KILOMETER = 0.621371
 WEATHER_HOURLY_FIELDS = "rain,snowfall,wind_speed_10m"
 
@@ -206,29 +205,29 @@ def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hou
     # Safety rule: extreme wind is a hard stop for the operation, and heavy cargo
     # makes moderate wind more dangerous because the vehicle is less stable.
     if wind_mph >= 55:
-        return "No Travel"
+        return NO_TRAVEL
     if 45 <= wind_mph < 55 and load_weight > 30_000:
-        return "No Travel"
+        return NO_TRAVEL
 
     wind_risk = (
-        "Low" if wind_mph < 25 else
-        "Moderate" if wind_mph < 35 else
-        "High" if wind_mph < 45 else
-        "Severe"
+        LOW if wind_mph < 25 else
+        MODERATE if wind_mph < 35 else
+        HIGH if wind_mph < 45 else
+        SEVERE
     )
     rain_risk = (
-        "Low" if rain_inches_per_hour < 0.10 else
-        "Moderate" if rain_inches_per_hour < 0.25 else
-        "High" if rain_inches_per_hour < 0.50 else
-        "Severe" if rain_inches_per_hour <= 1.00 else
-        "No Travel"
+        LOW if rain_inches_per_hour < 0.10 else
+        MODERATE if rain_inches_per_hour < 0.25 else
+        HIGH if rain_inches_per_hour < 0.50 else
+        SEVERE if rain_inches_per_hour <= 1.00 else
+        NO_TRAVEL
     )
     snow_risk = (
-        "Low" if snow_inches_per_hour < 0.5 else
-        "Moderate" if snow_inches_per_hour < 1.0 else
-        "High" if snow_inches_per_hour < 2.0 else
-        "Severe" if snow_inches_per_hour <= 3.0 else
-        "No Travel"
+        LOW if snow_inches_per_hour < 0.5 else
+        MODERATE if snow_inches_per_hour < 1.0 else
+        HIGH if snow_inches_per_hour < 2.0 else
+        SEVERE if snow_inches_per_hour <= 3.0 else
+        NO_TRAVEL
     )
 
     highest_weather_risk = max(
@@ -236,7 +235,7 @@ def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hou
     )
     if 35 <= wind_mph < 45 and load_weight > 40_000:
         highest_weather_risk = max(
-            (highest_weather_risk, "Severe"), key=RISK_SCORES.__getitem__
+            (highest_weather_risk, SEVERE), key=RISK_SCORES.__getitem__
         )
     return highest_weather_risk
 
@@ -614,17 +613,17 @@ def build_route_summary(
     no_travel_miles = sum(
         next_point["mile"] - point["mile"]
         for point, next_point in zip(checkpoints, checkpoints[1:])
-        if point["risk"] == "No Travel"
+        if point["risk"] == NO_TRAVEL
     )
     severe_miles = sum(
         next_point["mile"] - point["mile"]
         for point, next_point in zip(checkpoints, checkpoints[1:])
-        if RISK_SCORES[point["risk"]] >= RISK_SCORES["Severe"]
+        if RISK_SCORES[point["risk"]] >= RISK_SCORES[SEVERE]
     )
     high_risk_miles = sum(
         next_point["mile"] - point["mile"]
         for point, next_point in zip(checkpoints, checkpoints[1:])
-        if RISK_SCORES[point["risk"]] == RISK_SCORES["High"]
+        if RISK_SCORES[point["risk"]] == RISK_SCORES[HIGH]
     )
     covered_miles = sum(
         next_point["mile"] - point["mile"]

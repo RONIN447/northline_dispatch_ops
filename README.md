@@ -142,8 +142,11 @@ Run the backend regression tests:
 
 ```powershell
 cd backend
-python -m unittest routing.test_risk_rules
+python -m unittest routing.test_risk_rules briefing.tests
 ```
+
+The briefing tests validate the captured route-plan responses against the
+Python 3.9-compatible Pydantic models.
 
 Build the frontend for production:
 

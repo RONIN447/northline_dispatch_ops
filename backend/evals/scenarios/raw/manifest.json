@@ -1,0 +1,190 @@
+{
+  "captured_at_utc": "2026-10-21T15:24:41.062951+00:00",
+  "api_url": "https://northline-backend-wvdw.onrender.com/api/plan/",
+  "scenarios": [
+    {
+      "id": "sfo_to_lax",
+      "request": {
+        "origin": "San Francisco, CA",
+        "destination": "Los Angeles, CA",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "28000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "01_sfo_to_lax.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 52,
+      "error": null
+    },
+    {
+      "id": "seattle_to_portland",
+      "request": {
+        "origin": "Seattle, WA",
+        "destination": "Portland, OR",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "22000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "02_seattle_to_portland.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 27,
+      "error": null
+    },
+    {
+      "id": "denver_to_salt_lake_city",
+      "request": {
+        "origin": "Denver, CO",
+        "destination": "Salt Lake City, UT",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "35000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "03_denver_to_salt_lake_city.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 69,
+      "error": null
+    },
+    {
+      "id": "chicago_to_detroit",
+      "request": {
+        "origin": "Chicago, IL",
+        "destination": "Detroit, MI",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "30000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "04_chicago_to_detroit.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 39,
+      "error": null
+    },
+    {
+      "id": "dallas_to_houston",
+      "request": {
+        "origin": "Dallas, TX",
+        "destination": "Houston, TX",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "41000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "05_dallas_to_houston.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 35,
+      "error": null
+    },
+    {
+      "id": "atlanta_to_nashville",
+      "request": {
+        "origin": "Atlanta, GA",
+        "destination": "Nashville, TN",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "28000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "06_atlanta_to_nashville.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 36,
+      "error": null
+    },
+    {
+      "id": "boston_to_new_york",
+      "request": {
+        "origin": "Boston, MA",
+        "destination": "New York, NY",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "20000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "07_boston_to_new_york.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 32,
+      "error": null
+    },
+    {
+      "id": "minneapolis_to_kansas_city",
+      "request": {
+        "origin": "Minneapolis, MN",
+        "destination": "Kansas City, MO",
+        "departure": "2026-10-21T18:24:41+00:00",
+        "loadWeight": "40000",
+        "intervalMiles": "25"
+      },
+      "status_code": 200,
+      "response_file": "08_minneapolis_to_kansas_city.response.json",
+      "content_type": "application/json",
+      "top_level_keys": [
+        "origin",
+        "destination",
+        "routes",
+        "recommendedRouteId",
+        "forecastHours"
+      ],
+      "route_count": 3,
+      "checkpoint_count": 60,
+      "error": null
+    }
+  ]
+}

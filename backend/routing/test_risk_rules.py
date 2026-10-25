@@ -1,11 +1,17 @@
 import unittest
 from datetime import datetime, timedelta, timezone
 import json
+import os
 from unittest.mock import patch
 
 import requests
+import django
 from django.test import RequestFactory
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+django.setup()
+
+from routing.risk_levels import RISK_LEVELS
 from routing.views import (
     WeatherDataUnavailable,
     build_route_summary,
@@ -26,6 +32,9 @@ from routing.views import (
 
 
 class RiskClassificationTests(unittest.TestCase):
+    def test_risk_level_order(self):
+        self.assertEqual(RISK_LEVELS, ["Low", "Moderate", "High", "Severe", "No Travel"])
+
     def test_wind_boundaries(self):
         cases = (
             (24.99, "Low"),

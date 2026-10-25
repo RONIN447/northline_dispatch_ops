@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [master]
   pull_request:
     branches: [master]
 
@@ -31,7 +30,7 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: settings
           DEBUG: "True"
-        run: python -m unittest routing.test_risk_rules
+        run: python -m unittest routing.test_risk_rules briefing.tests
 
   frontend-build:
     name: Frontend production build
