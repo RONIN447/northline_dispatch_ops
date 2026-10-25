@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
+from django.test import Client
 from pydantic import ValidationError
 
 from briefing.providers import (
@@ -546,3 +547,135 @@ class BriefingValidatorTests(unittest.TestCase):
     @staticmethod
     def _rules(interventions):
         return {item.rule for item in interventions}
+
+
+class BriefingEndpointTests(unittest.TestCase):
+    def setUp(self):
+        response_file = (
+            Path(__file__).resolve().parents[1]
+            / "evals"
+            / "scenarios"
+            / "raw"
+            / "01_sfo_to_lax.response.json"
+        )
+        self.plan = json.loads(response_file.read_text(encoding="utf-8"))
+        self.client = Client(HTTP_HOST="localhost")
+        from briefing import views
+
+        views._request_times.clear()
+
+    def test_success_with_mock_returns_briefing_interventions_fallback_and_metadata(self):
+        with patch.dict(os.environ, {"LLM_PROVIDER": "mock", "MOCK_MODE": "normal"}):
+            response = self._post_plan()
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["briefing"]["recommended_route_id"], self.plan["recommendedRouteId"])
+        self.assertEqual(payload["interventions"], [])
+        self.assertFalse(payload["fallback_used"])
+        self.assertEqual(payload["metadata"]["provider"], "mock")
+        self.assertIn("prompt_version", payload["metadata"])
+        self.assertIn("input_tokens", payload["metadata"])
+        self.assertIn("output_tokens", payload["metadata"])
+        self.assertIn("latency_ms", payload["metadata"])
+        self.assertIn("retry_count", payload["metadata"])
+
+    def test_rejects_malformed_json(self):
+        response = self.client.post(
+            "/api/briefing/",
+            data=b"{",
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("valid JSON", response.json()["error"])
+
+    def test_rejects_non_object_or_missing_plan_keys(self):
+        response = self.client.post(
+            "/api/briefing/",
+            data=json.dumps(["not", "an", "object"]),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("object", response.json()["error"])
+
+    def test_rejects_oversized_request(self):
+        from briefing import views
+
+        response = self.client.post(
+            "/api/briefing/",
+            data=b"x" * (views.MAX_REQUEST_BYTES + 1),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 413)
+
+    def test_provider_failure_returns_safe_502(self):
+        with patch(
+            "briefing.views.generate_briefing",
+            side_effect=ProviderRequestError("private key must not be shown"),
+        ):
+            response = self._post_plan()
+
+        self.assertEqual(response.status_code, 502)
+        self.assertNotIn("private key", response.content.decode("utf-8"))
+
+    def test_generation_failure_returns_safe_502(self):
+        with patch(
+            "briefing.views.generate_briefing",
+            side_effect=BriefingGenerationError("invalid private model output"),
+        ):
+            response = self._post_plan()
+
+        self.assertEqual(response.status_code, 502)
+        self.assertNotIn("invalid private model output", response.content.decode("utf-8"))
+
+    def test_rate_limit_returns_429(self):
+        from briefing import views
+
+        with patch.object(views, "RATE_LIMIT_REQUESTS", 1):
+            with patch.dict(os.environ, {"LLM_PROVIDER": "mock"}):
+                first = self._post_plan()
+                second = self._post_plan()
+                other_ip = self._post_plan(remote_addr="192.0.2.10")
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 429)
+        self.assertEqual(other_ip.status_code, 200)
+
+    def test_cors_preflight_is_handled_by_shared_middleware(self):
+        response = self.client.options(
+            "/api/briefing/",
+            HTTP_ORIGIN="http://localhost:5173",
+            HTTP_ACCESS_CONTROL_REQUEST_METHOD="POST",
+        )
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(
+            response["Access-Control-Allow-Origin"],
+            "http://localhost:5173",
+        )
+
+    def test_faulty_mock_is_repaired_and_reports_intervention_and_fallback(self):
+        with patch.dict(
+            os.environ,
+            {"LLM_PROVIDER": "mock", "MOCK_MODE": "faulty_number"},
+        ):
+            response = self._post_plan()
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["fallback_used"])
+        self.assertIn(
+            "fallback_template",
+            {item["rule"] for item in payload["interventions"]},
+        )
+
+    def _post_plan(self, remote_addr="127.0.0.1"):
+        return self.client.post(
+            "/api/briefing/",
+            data=json.dumps(self.plan),
+            content_type="application/json",
+            REMOTE_ADDR=remote_addr,
+        )
