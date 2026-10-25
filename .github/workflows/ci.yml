@@ -67,4 +67,5 @@ jobs:
           DJANGO_SETTINGS_MODULE: settings
           DEBUG: "True"
           LLM_PROVIDER: mock
+          MOCK_MODE: faulty_number
         run: python -m django run_evals --gate
