@@ -170,7 +170,13 @@ $env:MOCK_MODE = "normal" # faulty_route, faulty_missing_checkpoint, faulty_numb
 
 Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
 `LLM_PROVIDER=openai` with `OPENAI_API_KEY` and `OPENAI_MODEL`, to call a hosted
-model. SDK imports are lazy, and provider requests have a 30-second timeout.
+model. SDK imports are lazy, and provider requests have a 20-second timeout
+inside a 45-second Gunicorn worker timeout.
+Production requires an explicit `LLM_PROVIDER`; leaving it unset disables briefing
+generation with a configuration response. Responses identify the selected provider
+and model in metadata, including `mock` / `rule-based` when the mock is selected. Set
+provider spending limits in the Anthropic or OpenAI dashboard as an additional cost
+safeguard.
 
 `briefing.service.generate_briefing(plan)` sends only route summaries and
 checkpoint weather/risk data (not route geometry), bounds location labels, and
@@ -213,6 +219,7 @@ The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing
 ## Limitations and safety
 
 - `/api/briefing/` trusts the route-plan JSON submitted by the caller; it does not recompute trips or independently verify caller-supplied route and weather data. The response is only grounded in that submitted plan. The per-IP rate limit helps control provider cost; recomputing plans server-side is deferred.
+- Briefing requests are limited to 10 per client IP per minute and 500 per UTC day in the running process. The daily in-memory ceiling resets on process restart and is not shared across multiple workers or instances; provider dashboard spending limits are the durable cost backstop.
 - OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
 - Weather is sampled from hourly forecast data; conditions can change between forecast hours and checkpoints.
 - OSRM may not be able to find three distinct drivable routes for every pair of locations. In that case, planning fails with an explanation instead of showing fewer than three options or presenting duplicate paths as alternatives.

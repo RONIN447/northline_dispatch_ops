@@ -51,6 +51,7 @@ _PLAN_DATA_END = "END_UNTRUSTED_ROUTE_PLAN_DATA"
 @dataclass
 class BriefingMetadata:
     provider: str
+    model: str
     prompt_version: str
     input_tokens: int
     output_tokens: int
@@ -96,6 +97,7 @@ def generate_briefing(plan: Dict[str, Any]) -> Tuple[Briefing, BriefingMetadata]
 
         metadata = BriefingMetadata(
             provider=_provider_name(provider),
+            model=_provider_model(provider),
             prompt_version=PROMPT_VERSION,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
@@ -161,3 +163,9 @@ def _provider_name(provider: Provider) -> str:
     if isinstance(provider, OpenAIProvider):
         return "openai"
     return provider.__class__.__name__
+
+
+def _provider_model(provider: Provider) -> str:
+    if isinstance(provider, MockProvider):
+        return "rule-based"
+    return getattr(provider, "_model", "unknown")

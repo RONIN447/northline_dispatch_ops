@@ -1,17 +1,21 @@
 """HTTP endpoint for generating guarded dispatch briefings."""
 
 import json
+import ipaddress
+import logging
 import math
 import threading
 import time
 from collections import OrderedDict, deque
 from dataclasses import asdict
+from datetime import datetime, timezone
+from uuid import uuid4
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 from evals.checks import validate_briefing
-from briefing.providers import ProviderRequestError
+from briefing.providers import ProviderConfigurationError, ProviderRequestError
 from briefing.service import BriefingGenerationError, generate_briefing
 from briefing.validator import BriefingValidationError, enforce
 from routing.risk_levels import RISK_LEVELS
@@ -19,56 +23,76 @@ from routing.risk_levels import RISK_LEVELS
 MAX_REQUEST_BYTES = 1024 * 1024
 RATE_LIMIT_REQUESTS = 10
 RATE_LIMIT_WINDOW_SECONDS = 60
+DAILY_REQUEST_LIMIT = 500
+DAILY_REQUEST_LIMIT = 1000
 MAX_TRACKED_CLIENTS = 10000
 _request_times = OrderedDict()
 _rate_limit_lock = threading.Lock()
+_daily_request_date = None
+_daily_request_count = 0
+_logger = logging.getLogger(__name__)
 
 
 @require_POST
 def create_briefing(request):
+    request_id = uuid4().hex
     if len(request.body) > MAX_REQUEST_BYTES:
-        return JsonResponse({"error": "Request body exceeds the 1 MB limit."}, status=413)
+        return _error_response("Request body exceeds the 1 MB limit.", 413, request_id)
 
-    client_ip = request.META.get("REMOTE_ADDR", "unknown")
+    client_ip = _client_ip(request)
     if not _allow_request(client_ip):
-        return JsonResponse(
-            {"error": "Briefing request limit reached. Please wait and try again."},
-            status=429,
+        return _error_response(
+            "Briefing request limit reached. Please wait and try again.", 429, request_id
         )
 
     try:
         plan = json.loads(request.body)
     except (json.JSONDecodeError, UnicodeDecodeError):
-        return JsonResponse({"error": "Request body must contain valid JSON."}, status=400)
+        return _error_response("Request body must contain valid JSON.", 400, request_id)
 
     validation_error = _validate_plan_shape(plan)
     if validation_error:
-        return JsonResponse({"error": validation_error}, status=400)
+        return _error_response(validation_error, 400, request_id)
+    if not _consume_daily_request():
+        return _error_response(
+            "Daily briefing request limit reached. Please try again tomorrow.",
+            429,
+            request_id,
+        )
 
     try:
         briefing, metadata = generate_briefing(plan)
         final_briefing, interventions, fallback_used = enforce(plan, briefing)
-    except ProviderRequestError:
-        return JsonResponse(
-            {"error": "The briefing provider is temporarily unavailable."},
-            status=502,
+    except ProviderConfigurationError as error:
+        _log_safe_exception(request_id, error)
+        return _error_response(
+            "Briefing generation is not configured on this server.", 503, request_id
         )
-    except BriefingGenerationError:
-        return JsonResponse(
-            {"error": "The briefing provider returned invalid output after retrying."},
-            status=502,
+    except ProviderRequestError as error:
+        _log_safe_exception(request_id, error)
+        return _error_response(
+            "The briefing provider is temporarily unavailable.", 502, request_id
         )
-    except BriefingValidationError:
-        return JsonResponse(
-            {"error": "The route plan could not be safely validated for briefing."},
-            status=400,
+    except BriefingGenerationError as error:
+        _log_safe_exception(request_id, error)
+        return _error_response(
+            "The briefing provider returned invalid output after retrying.", 502, request_id
+        )
+    except BriefingValidationError as error:
+        _log_safe_exception(request_id, error)
+        return _error_response(
+            "The route plan could not be safely validated for briefing.", 400, request_id
         )
 
     check_errors = validate_briefing(final_briefing, plan)
     if check_errors:
-        return JsonResponse(
-            {"error": "The generated briefing did not pass safety validation."},
-            status=502,
+        _logger.error(
+            "Briefing safety validation failed request_id=%s check_count=%d",
+            request_id,
+            len(check_errors),
+        )
+        return _error_response(
+            "The generated briefing did not pass safety validation.", 502, request_id
         )
 
     return JsonResponse(
@@ -77,8 +101,33 @@ def create_briefing(request):
             "interventions": [asdict(item) for item in interventions],
             "fallback_used": fallback_used,
             "metadata": asdict(metadata),
+            "request_id": request_id,
         }
     )
+
+
+def _error_response(message, status, request_id):
+    return JsonResponse({"error": message, "request_id": request_id}, status=status)
+
+
+def _log_safe_exception(request_id, error):
+    _logger.warning(
+        "Briefing request failed request_id=%s exception_type=%s",
+        request_id,
+        type(error).__name__,
+    )
+
+
+def _client_ip(request):
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    forwarded_addresses = [part.strip() for part in forwarded_for.split(",") if part.strip()]
+    if forwarded_addresses:
+        candidate = forwarded_addresses[-1]
+        try:
+            return str(ipaddress.ip_address(candidate))
+        except ValueError:
+            pass
+    return request.META.get("REMOTE_ADDR", "unknown")
 
 
 def _allow_request(client_ip):
@@ -101,6 +150,19 @@ def _allow_request(client_ip):
         return True
 
 
+def _consume_daily_request():
+    global _daily_request_date, _daily_request_count
+    today = datetime.now(timezone.utc).date()
+    with _rate_limit_lock:
+        if _daily_request_date != today:
+            _daily_request_date = today
+            _daily_request_count = 0
+        if _daily_request_count >= DAILY_REQUEST_LIMIT:
+            return False
+        _daily_request_count += 1
+        return True
+
+
 def _validate_plan_shape(plan):
     if not isinstance(plan, dict):
         return "Request JSON must be an object."
@@ -114,6 +176,18 @@ def _validate_plan_shape(plan):
         plan.get("destination"), dict
     ):
         return "Route plan must include origin and destination objects."
+    for endpoint_name in ("origin", "destination"):
+        endpoint = plan[endpoint_name]
+        if not isinstance(endpoint.get("label"), str) or not endpoint["label"].strip():
+            return "{} must include a non-empty label.".format(endpoint_name.capitalize())
+        for field in ("lat", "lon"):
+            value = endpoint.get(field)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not math.isfinite(value)
+            ):
+                return "{} must include finite {}.".format(endpoint_name.capitalize(), field)
     route_ids = set()
     for route in routes:
         if not isinstance(route, dict) or not isinstance(route.get("id"), str):
@@ -149,7 +223,13 @@ def _validate_plan_shape(plan):
                 or not math.isfinite(value)
             ):
                 return "Each route must include finite {}.".format(field)
+        if not isinstance(route.get("arrival"), str) or not isinstance(
+            route.get("summary"), str
+        ):
+            return "Each route must include string arrival and summary fields."
         for checkpoint in route["checkpoints"]:
+            if not isinstance(checkpoint.get("eta"), str):
+                return "Each checkpoint must include a string eta."
             for field in (
                 "mile",
                 "windMph",

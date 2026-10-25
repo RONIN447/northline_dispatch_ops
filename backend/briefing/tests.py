@@ -10,6 +10,8 @@ from pydantic import ValidationError
 
 from briefing.providers import (
     MockProvider,
+    GUNICORN_TIMEOUT_SECONDS,
+    PROVIDER_TIMEOUT_SECONDS,
     ProviderRequestError,
     ProviderResponse,
     get_provider,
@@ -563,6 +565,8 @@ class BriefingEndpointTests(unittest.TestCase):
         from briefing import views
 
         views._request_times.clear()
+        views._daily_request_date = None
+        views._daily_request_count = 0
 
     def test_success_with_mock_returns_briefing_interventions_fallback_and_metadata(self):
         with patch.dict(os.environ, {"LLM_PROVIDER": "mock", "MOCK_MODE": "normal"}):
@@ -574,11 +578,13 @@ class BriefingEndpointTests(unittest.TestCase):
         self.assertEqual(payload["interventions"], [])
         self.assertFalse(payload["fallback_used"])
         self.assertEqual(payload["metadata"]["provider"], "mock")
+        self.assertEqual(payload["metadata"]["model"], "rule-based")
         self.assertIn("prompt_version", payload["metadata"])
         self.assertIn("input_tokens", payload["metadata"])
         self.assertIn("output_tokens", payload["metadata"])
         self.assertIn("latency_ms", payload["metadata"])
         self.assertIn("retry_count", payload["metadata"])
+        self.assertIn("request_id", payload)
 
     def test_rejects_malformed_json(self):
         response = self.client.post(
@@ -600,6 +606,14 @@ class BriefingEndpointTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("object", response.json()["error"])
 
+    def test_rejects_broken_nested_plan_with_400(self):
+        plan = deepcopy(self.plan)
+        plan["routes"][0].pop("checkpoints")
+        response = self._post_plan(plan=plan)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("checkpoints", response.json()["error"])
+
     def test_rejects_oversized_request(self):
         from briefing import views
 
@@ -612,14 +626,21 @@ class BriefingEndpointTests(unittest.TestCase):
         self.assertEqual(response.status_code, 413)
 
     def test_provider_failure_returns_safe_502(self):
-        with patch(
-            "briefing.views.generate_briefing",
-            side_effect=ProviderRequestError("private key must not be shown"),
-        ):
-            response = self._post_plan()
+        with self.assertLogs("briefing.views", level="WARNING") as captured:
+            with patch(
+                "briefing.views.generate_briefing",
+                side_effect=ProviderRequestError(
+                    "private key and San Francisco must not be logged"
+                ),
+            ):
+                response = self._post_plan()
 
         self.assertEqual(response.status_code, 502)
         self.assertNotIn("private key", response.content.decode("utf-8"))
+        self.assertNotIn("San Francisco", "\n".join(captured.output))
+        self.assertNotIn("private key", "\n".join(captured.output))
+        self.assertIn("ProviderRequestError", "\n".join(captured.output))
+        self.assertIn(response.json()["request_id"], "\n".join(captured.output))
 
     def test_generation_failure_returns_safe_502(self):
         with patch(
@@ -643,6 +664,50 @@ class BriefingEndpointTests(unittest.TestCase):
         self.assertEqual(first.status_code, 200)
         self.assertEqual(second.status_code, 429)
         self.assertEqual(other_ip.status_code, 200)
+
+    def test_forwarded_ip_uses_last_proxy_added_address(self):
+        from briefing import views
+
+        with patch.object(views, "RATE_LIMIT_REQUESTS", 1):
+            with patch.dict(os.environ, {"LLM_PROVIDER": "mock"}):
+                first = self._post_plan(
+                    forwarded_for="198.51.100.1, 203.0.113.7",
+                    remote_addr="10.0.0.1",
+                )
+                spoofed_prefix = self._post_plan(
+                    forwarded_for="198.51.100.99, 203.0.113.7",
+                    remote_addr="10.0.0.1",
+                )
+                distinct_proxy_client = self._post_plan(
+                    forwarded_for="198.51.100.1, 203.0.113.8",
+                    remote_addr="10.0.0.1",
+                )
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(spoofed_prefix.status_code, 429)
+        self.assertEqual(distinct_proxy_client.status_code, 200)
+
+    def test_global_daily_limit_applies_across_client_ips(self):
+        from briefing import views
+
+        with patch.object(views, "DAILY_REQUEST_LIMIT", 1):
+            with patch.dict(os.environ, {"LLM_PROVIDER": "mock"}):
+                first = self._post_plan(remote_addr="192.0.2.1")
+                second = self._post_plan(remote_addr="192.0.2.2")
+
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(second.status_code, 429)
+        self.assertIn("Daily", second.json()["error"])
+
+    def test_unset_provider_is_rejected_in_production(self):
+        with patch.dict(os.environ, {"DEBUG": "False"}, clear=True):
+            response = self._post_plan()
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["error"], "Briefing generation is not configured on this server.")
+
+    def test_provider_timeout_is_shorter_than_gunicorn_timeout(self):
+        self.assertLess(PROVIDER_TIMEOUT_SECONDS, GUNICORN_TIMEOUT_SECONDS)
 
     def test_cors_preflight_is_handled_by_shared_middleware(self):
         response = self.client.options(
@@ -672,10 +737,14 @@ class BriefingEndpointTests(unittest.TestCase):
             {item["rule"] for item in payload["interventions"]},
         )
 
-    def _post_plan(self, remote_addr="127.0.0.1"):
+    def _post_plan(self, plan=None, remote_addr="127.0.0.1", forwarded_for=None):
+        headers = {}
+        if forwarded_for:
+            headers["HTTP_X_FORWARDED_FOR"] = forwarded_for
         return self.client.post(
             "/api/briefing/",
-            data=json.dumps(self.plan),
+            data=json.dumps(self.plan if plan is None else plan),
             content_type="application/json",
             REMOTE_ADDR=remote_addr,
+            **headers
         )

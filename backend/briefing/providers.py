@@ -11,7 +11,8 @@ from routing.risk_levels import HIGH, NO_TRAVEL, RISK_LEVELS, RISK_SCORES, SEVER
 
 from briefing.schema import Briefing, RiskyCheckpoint
 
-PROVIDER_TIMEOUT_SECONDS = 30.0
+PROVIDER_TIMEOUT_SECONDS = 20.0
+GUNICORN_TIMEOUT_SECONDS = 45
 
 
 @dataclass
@@ -25,6 +26,10 @@ class ProviderResponse:
 
 class ProviderRequestError(RuntimeError):
     """Raised when a hosted provider request fails."""
+
+
+class ProviderConfigurationError(RuntimeError):
+    """Raised when a production deployment has not selected a provider."""
 
 
 class Provider(Protocol):
@@ -199,6 +204,7 @@ class AnthropicProvider:
         self._client = anthropic.Anthropic(
             api_key=api_key,
             timeout=PROVIDER_TIMEOUT_SECONDS,
+            max_retries=0,
         )
 
     def generate(self, system: str, user: str) -> ProviderResponse:
@@ -243,6 +249,7 @@ class OpenAIProvider:
         self._client = OpenAI(
             api_key=api_key,
             timeout=PROVIDER_TIMEOUT_SECONDS,
+            max_retries=0,
         )
 
     def generate(self, system: str, user: str) -> ProviderResponse:
@@ -273,7 +280,15 @@ class OpenAIProvider:
 
 
 def get_provider(name: Optional[str] = None) -> Provider:
-    provider_name = (name or os.getenv("LLM_PROVIDER", "mock")).strip().lower()
+    configured_name = name or os.getenv("LLM_PROVIDER")
+    if not configured_name and (
+        os.getenv("RENDER", "").lower() == "true"
+        or os.getenv("DEBUG", "True").lower() not in {"1", "true", "yes", "on"}
+    ):
+        raise ProviderConfigurationError(
+            "LLM_PROVIDER must be configured in production."
+        )
+    provider_name = (configured_name or "mock").strip().lower()
     if provider_name == "mock":
         return MockProvider()
     if provider_name == "anthropic":
