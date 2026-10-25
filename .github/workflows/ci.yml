@@ -30,7 +30,7 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: settings
           DEBUG: "True"
-        run: python -m unittest routing.test_risk_rules briefing.tests
+        run: python -m unittest routing.test_risk_rules briefing.tests evals.test_scenarios
 
   frontend-build:
     name: Frontend production build

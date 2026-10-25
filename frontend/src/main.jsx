@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   CircleMarker,
@@ -35,7 +35,14 @@ const WEATHER_COLORS = {
   wind: '#e58b2d',
   rain: '#3182bd',
   snow: '#7b61b1',
+  unavailable: '#76847e',
 };
+
+function hasForecastGap(checkpoint) {
+  return checkpoint.windMph == null
+    || checkpoint.rainInHr == null
+    || checkpoint.snowInHr == null;
+}
 
 function getLocalDepartureTime() {
   const departure = new Date(Date.now() + 30 * 60 * 1000);
@@ -74,13 +81,18 @@ function buildCorridorHeatmap(route) {
 
   return route.checkpoints.slice(0, -1).map((checkpoint, index) => {
     const nextCheckpoint = route.checkpoints[index + 1];
-    const windScore = Math.min(1, checkpoint.windMph / 55);
-    const rainScore = Math.min(1, checkpoint.rainInHr / 1.01);
-    const snowScore = Math.min(1, checkpoint.snowInHr / 3.01);
-    const weatherType = snowScore >= rainScore && snowScore >= windScore
-      ? 'snow'
-      : rainScore >= windScore ? 'rain' : 'wind';
-    const intensity = Math.max(windScore, rainScore, snowScore);
+    const forecastUnavailable = hasForecastGap(checkpoint);
+    const windScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.windMph / 55);
+    const rainScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.rainInHr / 1.01);
+    const snowScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.snowInHr / 3.01);
+    const weatherType = forecastUnavailable
+      ? 'unavailable'
+      : snowScore >= rainScore && snowScore >= windScore
+        ? 'snow'
+        : rainScore >= windScore ? 'rain' : 'wind';
+    const intensity = forecastUnavailable
+      ? 0.65
+      : Math.max(windScore, rainScore, snowScore);
 
     return {
       id: `${route.id}-segment-${index}`,
@@ -167,13 +179,19 @@ function RouteMap({ routePlan, selectedRoute, forecastOffset, departure, onForec
               key={`${checkpoint.routeId}-${checkpoint.mile}-${checkpoint.lat}`}
               center={[checkpoint.lat, checkpoint.lon]}
               radius={checkpoint.selected
-                ? mapLayer === 'Risk' ? 7 : Math.max(6, Math.min(13, 6 + checkpoint.windMph / 10))
+                ? mapLayer === 'Risk'
+                  ? 7
+                  : hasForecastGap(checkpoint)
+                    ? 8
+                    : Math.max(6, Math.min(13, 6 + checkpoint.windMph / 10))
                 : 4}
               pathOptions={{
                 color: '#fff',
                 weight: checkpoint.selected ? 2 : 1,
                 fillColor: mapLayer === 'Risk'
                   ? RISK_COLORS[checkpoint.risk]
+                  : hasForecastGap(checkpoint)
+                    ? WEATHER_COLORS.unavailable
                   : checkpoint.snowInHr > 0.1
                     ? WEATHER_COLORS.snow
                     : checkpoint.rainInHr > 0.1
@@ -188,7 +206,9 @@ function RouteMap({ routePlan, selectedRoute, forecastOffset, departure, onForec
                 <div className="popup">
                   <b>{checkpoint.routeLabel} · {checkpoint.mile} mi · {checkpoint.risk}</b>
                   <br />Arrival {new Date(checkpoint.eta).toLocaleString()}
-                  <br />Wind {Math.round(checkpoint.windMph)} mph · Rain {checkpoint.rainInHr.toFixed(2)} in/hr · Snow {checkpoint.snowInHr.toFixed(1)} in/hr
+                  <br />Wind {checkpoint.windMph == null ? 'unavailable' : `${Math.round(checkpoint.windMph)} mph`}
+                  {' · '}Rain {checkpoint.rainInHr == null ? 'unavailable' : `${checkpoint.rainInHr.toFixed(2)} in/hr`}
+                  {' · '}Snow {checkpoint.snowInHr == null ? 'unavailable' : `${checkpoint.snowInHr.toFixed(1)} in/hr`}
                 </div>
               </Popup>
             </CircleMarker>
@@ -459,7 +479,15 @@ function RoutePlanner({ formValues, onFieldChange, onSubmit, isLoading, errorMes
   );
 }
 
-function RouteOptions({ routes, selectedRoute, onSelectRoute }) {
+function RouteOptions({
+  routes,
+  selectedRoute,
+  onSelectRoute,
+  briefingResult,
+  briefingLoading,
+  briefingError,
+  onGenerateBriefing,
+}) {
   return (
     <aside className="routes-panel">
       <div className="routes-header">
@@ -478,6 +506,14 @@ function RouteOptions({ routes, selectedRoute, onSelectRoute }) {
             {selectedRoute.severeMiles} severe mi · {selectedRoute.highMiles} high mi
           </small>
         </div>
+      )}
+      {selectedRoute && (
+        <BriefingPanel
+          result={briefingResult}
+          isLoading={briefingLoading}
+          errorMessage={briefingError}
+          onGenerate={onGenerateBriefing}
+        />
       )}
       <div className="route-list">
         {routes?.map((route, index) => (
@@ -545,13 +581,166 @@ function CheckpointList({ route }) {
             </div>
             <div className="cp-main">
               <b>{checkpoint.risk}</b>
-              <span>{formatEta(checkpoint.eta)} · {Math.round(checkpoint.windMph)} mph wind</span>
+              <span>
+                {formatEta(checkpoint.eta)} · Wind {checkpoint.windMph == null
+                  ? 'unavailable'
+                  : `${Math.round(checkpoint.windMph)} mph`}
+              </span>
             </div>
-            <div className="cp-weather"><CloudRain size={14} />{checkpoint.rainInHr.toFixed(2)}<small>in</small></div>
+            <div className="cp-weather">
+              <CloudRain size={14} />
+              {checkpoint.rainInHr == null ? 'Unavailable' : checkpoint.rainInHr.toFixed(2)}
+              <small>{checkpoint.rainInHr == null ? '' : 'in/hr'}</small>
+            </div>
           </div>
         ))}
       </div>
     </>
+  );
+}
+
+const BRIEFING_TIMEOUT_MS = 50000;
+
+function trimPlanForBriefing(plan) {
+  return {
+    origin: {
+      label: plan.origin.label,
+      lat: plan.origin.lat,
+      lon: plan.origin.lon,
+      timezone: plan.origin.timezone,
+    },
+    destination: {
+      label: plan.destination.label,
+      lat: plan.destination.lat,
+      lon: plan.destination.lon,
+      timezone: plan.destination.timezone,
+    },
+    recommendedRouteId: plan.recommendedRouteId,
+    forecastHours: plan.forecastHours,
+    routes: plan.routes.map((route) => ({
+      id: route.id,
+      distanceMiles: route.distanceMiles,
+      durationHours: route.durationHours,
+      arrival: route.arrival,
+      summary: route.summary,
+      severeMiles: route.severeMiles,
+      highMiles: route.highMiles,
+      noTravelMiles: route.noTravelMiles,
+      averageRisk: route.averageRisk,
+      checkpoints: route.checkpoints.map((checkpoint) => ({
+        mile: checkpoint.mile,
+        eta: checkpoint.eta,
+        windMph: checkpoint.windMph ?? null,
+        rainInHr: checkpoint.rainInHr ?? null,
+        snowInHr: checkpoint.snowInHr ?? null,
+        temperatureF: checkpoint.temperatureF ?? null,
+        forecastHour: checkpoint.forecastHour ?? null,
+        risk: checkpoint.risk,
+      })),
+    })),
+  };
+}
+
+function briefingErrorMessage(status, message) {
+  if (status === 400) return 'This route plan is incomplete or invalid. Analyze the routes again and retry.';
+  if (status === 413) return 'This route plan is too large to send. Please analyze the trip again and retry.';
+  if (status === 429) return 'The briefing request limit has been reached. Wait a moment before retrying.';
+  if (status === 502) return 'The briefing service could not complete this request. Please retry.';
+  if (status === 503) return 'AI briefing is not configured on this server. Please contact the administrator.';
+  return message || 'Unable to generate the dispatch briefing. Please retry.';
+}
+
+function BriefingPanel({ result, isLoading, errorMessage, onGenerate }) {
+  const briefing = result?.briefing;
+  const interventions = result?.interventions || [];
+  const corrected = interventions.length > 0 || result?.fallback_used;
+
+  return (
+    <section className="briefing-panel" aria-labelledby="briefing-title">
+      <div className="briefing-heading">
+        <div>
+          <div className="eyebrow">AI-GENERATED DECISION SUPPORT</div>
+          <h3 id="briefing-title">Dispatch briefing</h3>
+        </div>
+        {result?.metadata && (
+          <span className={`briefing-provider ${result.metadata.provider === 'mock' ? 'is-mock' : ''}`}>
+            {result.metadata.provider} · {result.metadata.model}
+          </span>
+        )}
+      </div>
+
+      {briefing ? (
+        <div className="briefing-content">
+          <p className="briefing-summary">{briefing.summary}</p>
+          {briefing.risky_checkpoints.length > 0 && (
+            <div className="briefing-section">
+              <b>Risky checkpoints</b>
+              <ul className="briefing-risk-list">
+                {briefing.risky_checkpoints.map((checkpoint) => (
+                  <li key={`${checkpoint.route_id}-${checkpoint.checkpoint_index}`}>
+                    <span>{checkpoint.route_id} · checkpoint {checkpoint.checkpoint_index}</span>
+                    <span
+                      className="briefing-risk"
+                      style={{
+                        color: RISK_COLORS[checkpoint.level],
+                        backgroundColor: `${RISK_COLORS[checkpoint.level]}18`,
+                        borderColor: `${RISK_COLORS[checkpoint.level]}55`,
+                      }}
+                    >
+                      {checkpoint.level}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {briefing.data_gaps.length > 0 && (
+            <div className="briefing-section">
+              <b>Forecast data gaps</b>
+              <ul>{briefing.data_gaps.map((gap) => <li key={gap}>{gap}</li>)}</ul>
+            </div>
+          )}
+          {briefing.dispatcher_actions.length > 0 && (
+            <div className="briefing-section">
+              <b>Dispatcher actions</b>
+              <ul>{briefing.dispatcher_actions.map((action) => <li key={action}>{action}</li>)}</ul>
+            </div>
+          )}
+          {corrected && (
+            <div className="briefing-correction">
+              <b>Safety layer corrected this briefing.</b>
+              <details>
+                <summary>View corrections</summary>
+                <ul>
+                  {interventions.map((item, index) => (
+                    <li key={`${item.rule}-${index}`}><b>{item.rule}</b>: {item.detail}</li>
+                  ))}
+                  {result.fallback_used && interventions.length === 0 && (
+                    <li>A deterministic template replaced the generated briefing.</li>
+                  )}
+                </ul>
+              </details>
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="briefing-empty">
+          Summarize the recommendation, elevated-risk checkpoints, and forecast gaps.
+        </p>
+      )}
+
+      {errorMessage && <div className="briefing-error" role="alert">{errorMessage}</div>}
+      <button
+        type="button"
+        className="briefing-button"
+        onClick={onGenerate}
+        disabled={isLoading}
+      >
+        {isLoading
+          ? <><LoaderCircle className="spin" size={15} /> Generating briefing...</>
+          : briefing || errorMessage ? 'Retry briefing' : 'Generate briefing'}
+      </button>
+    </section>
   );
 }
 
@@ -573,8 +762,18 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [forecastOffset, setForecastOffset] = useState(0);
   const [mapLayer, setMapLayer] = useState('Risk');
+  const [briefingResult, setBriefingResult] = useState(null);
+  const [briefingLoading, setBriefingLoading] = useState(false);
+  const [briefingError, setBriefingError] = useState('');
+  const briefingRequest = useRef(null);
+  const briefingTimeout = useRef(null);
   const forecastRequestTimer = React.useRef(null);
   React.useEffect(() => () => window.clearTimeout(forecastRequestTimer.current), []);
+  React.useEffect(() => () => {
+    window.clearTimeout(briefingTimeout.current);
+    briefingRequest.current?.abort();
+    briefingRequest.current = null;
+  }, []);
   const selectedRoute = routePlan?.routes.find((route) => route.id === selectedRouteId)
     || routePlan?.routes[0];
 
@@ -585,6 +784,12 @@ function App() {
   // The planner submits a single payload to the backend, which handles the heavy work of
   // geocoding, route alternatives, weather lookup, scoring, and ranking.
   async function requestRoutePlan(departureValue = formValues.departure) {
+    window.clearTimeout(briefingTimeout.current);
+    briefingRequest.current?.abort();
+    briefingRequest.current = null;
+    setBriefingResult(null);
+    setBriefingError('');
+    setBriefingLoading(false);
     setIsLoading(true);
     setErrorMessage('');
 
@@ -623,6 +828,57 @@ function App() {
       return null;
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function requestBriefing() {
+    if (!routePlan) return;
+    window.clearTimeout(briefingTimeout.current);
+    briefingRequest.current?.abort();
+    const controller = new AbortController();
+    let timedOut = false;
+    briefingRequest.current = controller;
+    setBriefingLoading(true);
+    setBriefingError('');
+    setBriefingResult(null);
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, BRIEFING_TIMEOUT_MS);
+    briefingTimeout.current = timeoutId;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/briefing/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trimPlanForBriefing(routePlan)),
+        signal: controller.signal,
+      });
+      const responseText = await response.text();
+      let responseBody = {};
+      if (responseText) {
+        try {
+          responseBody = JSON.parse(responseText);
+        } catch {
+          throw new Error('The briefing service returned an invalid response.');
+        }
+      }
+      if (!response.ok) {
+        throw new Error(briefingErrorMessage(response.status, responseBody.error));
+      }
+      setBriefingResult(responseBody);
+    } catch (error) {
+      if (controller.signal.aborted && !timedOut) return;
+      setBriefingError(timedOut
+        ? 'The briefing request timed out. Please retry.'
+        : error.message);
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (briefingTimeout.current === timeoutId) briefingTimeout.current = null;
+      if (briefingRequest.current === controller) {
+        briefingRequest.current = null;
+        setBriefingLoading(false);
+      }
     }
   }
 
@@ -684,6 +940,10 @@ function App() {
           routes={routePlan?.routes}
           selectedRoute={selectedRoute}
           onSelectRoute={setSelectedRouteId}
+          briefingResult={briefingResult}
+          briefingLoading={briefingLoading}
+          briefingError={briefingError}
+          onGenerateBriefing={requestBriefing}
         />
       </div>
     </main>

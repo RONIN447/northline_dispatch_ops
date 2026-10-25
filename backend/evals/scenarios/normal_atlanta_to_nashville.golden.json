@@ -1,0 +1,434 @@
+{
+  "id": "normal_atlanta_to_nashville",
+  "category": "normal_trip",
+  "description": "Captured baseline trip with engine-recomputed risks.",
+  "tags": [
+    "captured",
+    "baseline"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 28000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Atlanta, Georgia, United States",
+      "lat": 33.749,
+      "lon": -84.38798,
+      "timezone": "America/New_York"
+    },
+    "destination": {
+      "label": "Nashville, Tennessee, United States",
+      "lat": 36.16589,
+      "lon": -86.78444,
+      "timezone": "America/Chicago"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 248.8,
+        "durationHours": 4.7,
+        "arrival": "2026-10-21T23:08:03.100000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:53:09.124595+00:00",
+            "windMph": 2.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:21:37.249191+00:00",
+            "windMph": 3.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:50:05.373786+00:00",
+            "windMph": 2.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:18:33.498382+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:47:01.622977+00:00",
+            "windMph": 2.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:15:29.747573+00:00",
+            "windMph": 7.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:43:57.872168+00:00",
+            "windMph": 5.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:12:25.996764+00:00",
+            "windMph": 6.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:40:54.121359+00:00",
+            "windMph": 5.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 248.8,
+            "eta": "2026-10-21T23:08:03.100000+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "249 miles · 4.7 hr · Atlanta, Georgia, United States to Nashville, Tennessee, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 260.3,
+        "durationHours": 5.5,
+        "arrival": "2026-10-21T23:54:09.400000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:56:19.581053+00:00",
+            "windMph": 2.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:27:58.162106+00:00",
+            "windMph": 3.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:59:36.743159+00:00",
+            "windMph": 2.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:31:15.324212+00:00",
+            "windMph": 4.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:02:53.905265+00:00",
+            "windMph": 4.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:34:32.486318+00:00",
+            "windMph": 2.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:06:11.067371+00:00",
+            "windMph": 5.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:37:49.648424+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:09:28.229477+00:00",
+            "windMph": 5.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:41:06.810530+00:00",
+            "windMph": 5.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 260.3,
+            "eta": "2026-10-21T23:54:09.400000+00:00",
+            "windMph": 5.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "260 miles · 5.5 hr · Atlanta, Georgia, United States to Nashville, Tennessee, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 277.6,
+        "durationHours": 6.1,
+        "arrival": "2026-10-22T00:29:53.100000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:57:34.105205+00:00",
+            "windMph": 2.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:30:27.210410+00:00",
+            "windMph": 4.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:03:20.315615+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:36:13.420820+00:00",
+            "windMph": 4.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:09:06.526025+00:00",
+            "windMph": 3.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:41:59.631230+00:00",
+            "windMph": 3.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:14:52.736434+00:00",
+            "windMph": 5.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:47:45.841640+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:20:38.946844+00:00",
+            "windMph": 6.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:53:32.052049+00:00",
+            "windMph": 6.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-22T00:26:25.157254+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 277.6,
+            "eta": "2026-10-22T00:29:53.100000+00:00",
+            "windMph": 5.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "278 miles · 6.1 hr · Atlanta, Georgia, United States to Nashville, Tennessee, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

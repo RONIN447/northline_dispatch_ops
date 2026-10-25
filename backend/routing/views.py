@@ -202,6 +202,18 @@ def geocode_location(location_name):
 
 def classify_checkpoint_risk(wind_mph, rain_inches_per_hour, snow_inches_per_hour, load_weight):
     """Return the highest applicable weather category after load adjustments."""
+    weather_values = (wind_mph, rain_inches_per_hour, snow_inches_per_hour)
+    if any(value is None for value in weather_values):
+        if all(value is None for value in weather_values):
+            return NO_TRAVEL
+        known_risk = classify_checkpoint_risk(
+            wind_mph if wind_mph is not None else 0,
+            rain_inches_per_hour if rain_inches_per_hour is not None else 0,
+            snow_inches_per_hour if snow_inches_per_hour is not None else 0,
+            load_weight,
+        )
+        return max((known_risk, SEVERE), key=RISK_SCORES.__getitem__)
+
     # Safety rule: extreme wind is a hard stop for the operation, and heavy cargo
     # makes moderate wind more dangerous because the vehicle is less stable.
     if wind_mph >= 55:
@@ -292,9 +304,7 @@ def parse_weather_forecast(hourly_forecast, arrival_time):
     def forecast_value(field_name):
         values = hourly_forecast.get(field_name, [])
         if forecast_index >= len(values) or values[forecast_index] is None:
-            raise WeatherDataUnavailable(
-                f"The weather provider returned no {field_name} data for a checkpoint."
-            )
+            return None
         numeric_value = float(values[forecast_index])
         if not math.isfinite(numeric_value) or numeric_value < 0:
             raise WeatherDataUnavailable(
@@ -571,6 +581,74 @@ def build_checkpoint_locations(route_data, departure_time, checkpoint_spacing):
     return checkpoint_locations
 
 
+def recompute_route_risk_summary(route_summary, load_weight, duration_for_rank=None):
+    """Recompute checkpoint risks and route risk metrics with the engine rules."""
+    recomputed = dict(route_summary)
+    checkpoints = []
+    for checkpoint in route_summary["checkpoints"]:
+        recomputed_checkpoint = dict(checkpoint)
+        recomputed_checkpoint["risk"] = classify_checkpoint_risk(
+            recomputed_checkpoint.get("windMph"),
+            recomputed_checkpoint.get("rainInHr"),
+            recomputed_checkpoint.get("snowInHr"),
+            load_weight,
+        )
+        checkpoints.append(recomputed_checkpoint)
+    recomputed["checkpoints"] = checkpoints
+
+    no_travel_miles = sum(
+        next_point["mile"] - point["mile"]
+        for point, next_point in zip(checkpoints, checkpoints[1:])
+        if point["risk"] == NO_TRAVEL
+    )
+    severe_miles = sum(
+        next_point["mile"] - point["mile"]
+        for point, next_point in zip(checkpoints, checkpoints[1:])
+        if RISK_SCORES[point["risk"]] >= RISK_SCORES[SEVERE]
+    )
+    high_risk_miles = sum(
+        next_point["mile"] - point["mile"]
+        for point, next_point in zip(checkpoints, checkpoints[1:])
+        if RISK_SCORES[point["risk"]] == RISK_SCORES[HIGH]
+    )
+    covered_miles = sum(
+        next_point["mile"] - point["mile"]
+        for point, next_point in zip(checkpoints, checkpoints[1:])
+    )
+    average_risk = (
+        sum(
+            RISK_SCORES[point["risk"]] * (next_point["mile"] - point["mile"])
+            for point, next_point in zip(checkpoints, checkpoints[1:])
+        ) / covered_miles
+        if covered_miles
+        else RISK_SCORES[checkpoints[0]["risk"]]
+    )
+
+    recomputed["noTravelMiles"] = round(no_travel_miles, 1)
+    recomputed["severeMiles"] = round(severe_miles, 1)
+    recomputed["highMiles"] = round(high_risk_miles, 1)
+    recomputed["averageRisk"] = round(average_risk, 2)
+    recomputed["rankKey"] = (
+        severe_miles,
+        high_risk_miles,
+        average_risk,
+        duration_for_rank if duration_for_rank is not None else route_summary["durationHours"],
+    )
+    return recomputed
+
+
+def rank_route_summaries(route_summaries):
+    """Return ranked route summaries with the engine's deterministic recommendation."""
+    ordered_routes = sorted(route_summaries, key=lambda route: route["rankKey"])
+    ranked_routes = []
+    for route_index, route in enumerate(ordered_routes):
+        ranked_route = dict(route)
+        ranked_route.pop("rankKey", None)
+        ranked_route["recommended"] = route_index == 0
+        ranked_routes.append(ranked_route)
+    return ranked_routes
+
+
 def build_route_summary(
     route_data,
     origin,
@@ -610,51 +688,19 @@ def build_route_summary(
             **weather,
         })
 
-    no_travel_miles = sum(
-        next_point["mile"] - point["mile"]
-        for point, next_point in zip(checkpoints, checkpoints[1:])
-        if point["risk"] == NO_TRAVEL
-    )
-    severe_miles = sum(
-        next_point["mile"] - point["mile"]
-        for point, next_point in zip(checkpoints, checkpoints[1:])
-        if RISK_SCORES[point["risk"]] >= RISK_SCORES[SEVERE]
-    )
-    high_risk_miles = sum(
-        next_point["mile"] - point["mile"]
-        for point, next_point in zip(checkpoints, checkpoints[1:])
-        if RISK_SCORES[point["risk"]] == RISK_SCORES[HIGH]
-    )
-    covered_miles = sum(
-        next_point["mile"] - point["mile"]
-        for point, next_point in zip(checkpoints, checkpoints[1:])
-    )
-    average_risk = (
-        sum(
-            RISK_SCORES[point["risk"]] * (next_point["mile"] - point["mile"])
-            for point, next_point in zip(checkpoints, checkpoints[1:])
-        ) / covered_miles
-        if covered_miles
-        else RISK_SCORES[checkpoints[0]["risk"]]
-    )
     arrival_time = datetime.fromtimestamp(
         departure_time.timestamp() + travel_hours * 3600, timezone.utc
     )
 
-    return {
+    return recompute_route_risk_summary({
         "id": f"route-{route_index}-{route_data.get('weight_name', 'option')}",
         "distanceMiles": round(distance_miles, 1),
         "durationHours": round(travel_hours, 1),
         "arrival": arrival_time.isoformat(),
         "geometry": route_coordinates,
         "checkpoints": checkpoints,
-        "severeMiles": round(severe_miles, 1),
-        "highMiles": round(high_risk_miles, 1),
-        "noTravelMiles": round(no_travel_miles, 1),
-        "averageRisk": round(average_risk, 2),
         "summary": f"{distance_miles:.0f} miles · {travel_hours:.1f} hr · {origin['label']} to {destination['label']}",
-        "rankKey": (severe_miles, high_risk_miles, average_risk, travel_hours),
-    }
+    }, load_weight, travel_hours)
 
 
 @require_POST
@@ -704,10 +750,7 @@ def plan_route(request):
             weather_offset = weather_end
         # Operational ranking is intentionally safety-first: the route with the least
         # severe exposure is selected before duration is considered.
-        route_summaries.sort(key=lambda route: route["rankKey"])
-        for route_index, route in enumerate(route_summaries):
-            route.pop("rankKey")
-            route["recommended"] = route_index == 0
+        route_summaries = rank_route_summaries(route_summaries)
 
         return JsonResponse({
             "origin": origin,
