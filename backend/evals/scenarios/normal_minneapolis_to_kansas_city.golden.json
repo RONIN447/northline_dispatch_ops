@@ -1,0 +1,674 @@
+{
+  "id": "normal_minneapolis_to_kansas_city",
+  "category": "normal_trip",
+  "description": "Captured baseline trip with engine-recomputed risks.",
+  "tags": [
+    "captured",
+    "baseline"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 40000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Minneapolis, Minnesota, United States",
+      "lat": 44.97997,
+      "lon": -93.26384,
+      "timezone": "America/Chicago"
+    },
+    "destination": {
+      "label": "Kansas City, Missouri, United States",
+      "lat": 39.09973,
+      "lon": -94.57857,
+      "timezone": "America/Chicago"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 435.9,
+        "durationHours": 8.0,
+        "arrival": "2026-10-22T02:22:50.800000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 5.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:52:06.555928+00:00",
+            "windMph": 5.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:19:32.111857+00:00",
+            "windMph": 5.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:46:57.667785+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:14:23.223713+00:00",
+            "windMph": 4.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:41:48.779642+00:00",
+            "windMph": 6.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:09:14.335570+00:00",
+            "windMph": 8.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:36:39.891499+00:00",
+            "windMph": 6.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:04:05.447427+00:00",
+            "windMph": 7.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:31:31.003355+00:00",
+            "windMph": 5.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T22:58:56.559283+00:00",
+            "windMph": 5.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:26:22.115212+00:00",
+            "windMph": 4.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-21T23:53:47.671140+00:00",
+            "windMph": 5.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:21:13.227069+00:00",
+            "windMph": 4.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T00:48:38.782997+00:00",
+            "windMph": 5.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T01:16:04.338925+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T01:43:29.894854+00:00",
+            "windMph": 4.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T02:10:55.450782+00:00",
+            "windMph": 3.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 435.9,
+            "eta": "2026-10-22T02:22:50.800000+00:00",
+            "windMph": 3.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "436 miles · 8.0 hr · Minneapolis, Minnesota, United States to Kansas City, Missouri, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 457.5,
+        "durationHours": 9.0,
+        "arrival": "2026-10-22T03:27:25.400000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 5.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:54:20.609575+00:00",
+            "windMph": 5.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:24:00.219149+00:00",
+            "windMph": 5.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:53:39.828724+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:23:19.438298+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:52:59.047873+00:00",
+            "windMph": 6.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:22:38.657448+00:00",
+            "windMph": 7.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:52:18.267022+00:00",
+            "windMph": 8.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:21:57.876597+00:00",
+            "windMph": 7.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:51:37.486171+00:00",
+            "windMph": 5.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:21:17.095746+00:00",
+            "windMph": 4.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:50:56.705321+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:20:36.314895+00:00",
+            "windMph": 5.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:50:15.924470+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T01:19:55.534045+00:00",
+            "windMph": 5.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T01:49:35.143619+00:00",
+            "windMph": 5.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T02:19:14.753194+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T02:48:54.362768+00:00",
+            "windMph": 3.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 450,
+            "eta": "2026-10-22T03:18:33.972343+00:00",
+            "windMph": 1.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 457.5,
+            "eta": "2026-10-22T03:27:25.400000+00:00",
+            "windMph": 2.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "457 miles · 9.0 hr · Minneapolis, Minnesota, United States to Kansas City, Missouri, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 483.0,
+        "durationHours": 9.2,
+        "arrival": "2026-10-22T03:37:51.200000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 5.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:53:18.794378+00:00",
+            "windMph": 5.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:21:56.588756+00:00",
+            "windMph": 5.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:50:34.383134+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:19:12.177512+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:47:49.971890+00:00",
+            "windMph": 6.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:16:27.766268+00:00",
+            "windMph": 8.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:45:05.560646+00:00",
+            "windMph": 6.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:13:43.355024+00:00",
+            "windMph": 8.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:42:21.149402+00:00",
+            "windMph": 4.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:10:58.943780+00:00",
+            "windMph": 5.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:39:36.738158+00:00",
+            "windMph": 6.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:08:14.532536+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:36:52.326914+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T01:05:30.121292+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T01:34:07.915670+00:00",
+            "windMph": 4.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T02:02:45.710048+00:00",
+            "windMph": 5.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T02:31:23.504426+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 450,
+            "eta": "2026-10-22T03:00:01.298804+00:00",
+            "windMph": 2.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 475,
+            "eta": "2026-10-22T03:28:39.093182+00:00",
+            "windMph": 1.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 483.0,
+            "eta": "2026-10-22T03:37:51.200000+00:00",
+            "windMph": 1.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T04:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "483 miles · 9.2 hr · Minneapolis, Minnesota, United States to Kansas City, Missouri, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

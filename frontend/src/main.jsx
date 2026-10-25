@@ -35,7 +35,14 @@ const WEATHER_COLORS = {
   wind: '#e58b2d',
   rain: '#3182bd',
   snow: '#7b61b1',
+  unavailable: '#76847e',
 };
+
+function hasForecastGap(checkpoint) {
+  return checkpoint.windMph == null
+    || checkpoint.rainInHr == null
+    || checkpoint.snowInHr == null;
+}
 
 function getLocalDepartureTime() {
   const departure = new Date(Date.now() + 30 * 60 * 1000);
@@ -74,13 +81,18 @@ function buildCorridorHeatmap(route) {
 
   return route.checkpoints.slice(0, -1).map((checkpoint, index) => {
     const nextCheckpoint = route.checkpoints[index + 1];
-    const windScore = Math.min(1, checkpoint.windMph / 55);
-    const rainScore = Math.min(1, checkpoint.rainInHr / 1.01);
-    const snowScore = Math.min(1, checkpoint.snowInHr / 3.01);
-    const weatherType = snowScore >= rainScore && snowScore >= windScore
-      ? 'snow'
-      : rainScore >= windScore ? 'rain' : 'wind';
-    const intensity = Math.max(windScore, rainScore, snowScore);
+    const forecastUnavailable = hasForecastGap(checkpoint);
+    const windScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.windMph / 55);
+    const rainScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.rainInHr / 1.01);
+    const snowScore = forecastUnavailable ? 0 : Math.min(1, checkpoint.snowInHr / 3.01);
+    const weatherType = forecastUnavailable
+      ? 'unavailable'
+      : snowScore >= rainScore && snowScore >= windScore
+        ? 'snow'
+        : rainScore >= windScore ? 'rain' : 'wind';
+    const intensity = forecastUnavailable
+      ? 0.65
+      : Math.max(windScore, rainScore, snowScore);
 
     return {
       id: `${route.id}-segment-${index}`,
@@ -167,13 +179,19 @@ function RouteMap({ routePlan, selectedRoute, forecastOffset, departure, onForec
               key={`${checkpoint.routeId}-${checkpoint.mile}-${checkpoint.lat}`}
               center={[checkpoint.lat, checkpoint.lon]}
               radius={checkpoint.selected
-                ? mapLayer === 'Risk' ? 7 : Math.max(6, Math.min(13, 6 + checkpoint.windMph / 10))
+                ? mapLayer === 'Risk'
+                  ? 7
+                  : hasForecastGap(checkpoint)
+                    ? 8
+                    : Math.max(6, Math.min(13, 6 + checkpoint.windMph / 10))
                 : 4}
               pathOptions={{
                 color: '#fff',
                 weight: checkpoint.selected ? 2 : 1,
                 fillColor: mapLayer === 'Risk'
                   ? RISK_COLORS[checkpoint.risk]
+                  : hasForecastGap(checkpoint)
+                    ? WEATHER_COLORS.unavailable
                   : checkpoint.snowInHr > 0.1
                     ? WEATHER_COLORS.snow
                     : checkpoint.rainInHr > 0.1
@@ -188,7 +206,9 @@ function RouteMap({ routePlan, selectedRoute, forecastOffset, departure, onForec
                 <div className="popup">
                   <b>{checkpoint.routeLabel} · {checkpoint.mile} mi · {checkpoint.risk}</b>
                   <br />Arrival {new Date(checkpoint.eta).toLocaleString()}
-                  <br />Wind {Math.round(checkpoint.windMph)} mph · Rain {checkpoint.rainInHr.toFixed(2)} in/hr · Snow {checkpoint.snowInHr.toFixed(1)} in/hr
+                  <br />Wind {checkpoint.windMph == null ? 'unavailable' : `${Math.round(checkpoint.windMph)} mph`}
+                  {' · '}Rain {checkpoint.rainInHr == null ? 'unavailable' : `${checkpoint.rainInHr.toFixed(2)} in/hr`}
+                  {' · '}Snow {checkpoint.snowInHr == null ? 'unavailable' : `${checkpoint.snowInHr.toFixed(1)} in/hr`}
                 </div>
               </Popup>
             </CircleMarker>
@@ -561,9 +581,17 @@ function CheckpointList({ route }) {
             </div>
             <div className="cp-main">
               <b>{checkpoint.risk}</b>
-              <span>{formatEta(checkpoint.eta)} · {Math.round(checkpoint.windMph)} mph wind</span>
+              <span>
+                {formatEta(checkpoint.eta)} · Wind {checkpoint.windMph == null
+                  ? 'unavailable'
+                  : `${Math.round(checkpoint.windMph)} mph`}
+              </span>
             </div>
-            <div className="cp-weather"><CloudRain size={14} />{checkpoint.rainInHr.toFixed(2)}<small>in</small></div>
+            <div className="cp-weather">
+              <CloudRain size={14} />
+              {checkpoint.rainInHr == null ? 'Unavailable' : checkpoint.rainInHr.toFixed(2)}
+              <small>{checkpoint.rainInHr == null ? '' : 'in/hr'}</small>
+            </div>
           </div>
         ))}
       </div>

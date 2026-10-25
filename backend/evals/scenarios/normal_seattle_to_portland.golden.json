@@ -1,0 +1,344 @@
+{
+  "id": "normal_seattle_to_portland",
+  "category": "normal_trip",
+  "description": "Captured baseline trip with engine-recomputed risks.",
+  "tags": [
+    "captured",
+    "baseline"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 22000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Seattle, Washington, United States",
+      "lat": 47.60621,
+      "lon": -122.33207,
+      "timezone": "America/Los_Angeles"
+    },
+    "destination": {
+      "label": "Portland, Oregon, United States",
+      "lat": 45.52345,
+      "lon": -122.67621,
+      "timezone": "America/Los_Angeles"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 173.0,
+        "durationHours": 3.4,
+        "arrival": "2026-10-21T21:50:48.900000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:54:28.118573+00:00",
+            "windMph": 0.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:24:15.237145+00:00",
+            "windMph": 1.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:54:02.355718+00:00",
+            "windMph": 1.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:23:49.474291+00:00",
+            "windMph": 2.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:53:36.592864+00:00",
+            "windMph": 1.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:23:23.711436+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 173.0,
+            "eta": "2026-10-21T21:50:48.900000+00:00",
+            "windMph": 1.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "173 miles · 3.4 hr · Seattle, Washington, United States to Portland, Oregon, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 221.4,
+        "durationHours": 4.7,
+        "arrival": "2026-10-21T23:04:58.800000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:56:19.655749+00:00",
+            "windMph": 0.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:27:58.311499+00:00",
+            "windMph": 1.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:59:36.967248+00:00",
+            "windMph": 2.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:31:15.622997+00:00",
+            "windMph": 1.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:02:54.278747+00:00",
+            "windMph": 0.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:34:32.934496+00:00",
+            "windMph": 0.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:06:11.590245+00:00",
+            "windMph": 3.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:37:50.245995+00:00",
+            "windMph": 4.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 221.4,
+            "eta": "2026-10-21T23:04:58.800000+00:00",
+            "windMph": 2.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "221 miles · 4.7 hr · Seattle, Washington, United States to Portland, Oregon, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 194.4,
+        "durationHours": 5.5,
+        "arrival": "2026-10-21T23:55:20.400000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T19:07:11.866381+00:00",
+            "windMph": 0.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:49:42.732762+00:00",
+            "windMph": 0.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:32:13.599143+00:00",
+            "windMph": 2.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T21:14:44.465524+00:00",
+            "windMph": 0.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:57:15.331905+00:00",
+            "windMph": 0.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T22:39:46.198286+00:00",
+            "windMph": 4.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T23:22:17.064667+00:00",
+            "windMph": 4.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 194.4,
+            "eta": "2026-10-21T23:55:20.400000+00:00",
+            "windMph": 2.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "194 miles · 5.5 hr · Seattle, Washington, United States to Portland, Oregon, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

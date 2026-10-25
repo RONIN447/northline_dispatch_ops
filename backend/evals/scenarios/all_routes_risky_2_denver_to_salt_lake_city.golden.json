@@ -1,0 +1,765 @@
+{
+  "id": "all_routes_risky_2_denver_to_salt_lake_city",
+  "category": "all_routes_risky",
+  "description": "All routes have High wind risk at every checkpoint.",
+  "tags": [
+    "synthetic",
+    "all_routes_risky",
+    "wind_36mph"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 28000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Denver, Colorado, United States",
+      "lat": 39.73915,
+      "lon": -104.9847,
+      "timezone": "America/Denver"
+    },
+    "destination": {
+      "label": "Salt Lake City, Utah, United States",
+      "lat": 40.76078,
+      "lon": -111.89105,
+      "timezone": "America/Denver"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 520.4,
+        "durationHours": 9.0,
+        "arrival": "2026-10-22T03:24:36.700000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:50:37.279098+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:16:33.558195+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:42:29.837292+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:08:26.116390+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:34:22.395488+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:00:18.674585+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:26:14.953682+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T21:52:11.232780+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:18:07.511878+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T22:44:03.790975+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:10:00.070072+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-21T23:35:56.349170+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:01:52.628268+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T00:27:48.907365+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T00:53:45.186462+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T01:19:41.465560+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T01:45:37.744658+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 450,
+            "eta": "2026-10-22T02:11:34.023755+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 475,
+            "eta": "2026-10-22T02:37:30.302852+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 500,
+            "eta": "2026-10-22T03:03:26.581950+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 520.4,
+            "eta": "2026-10-22T03:24:36.700000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 520.4,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "520 miles · 9.0 hr · Denver, Colorado, United States to Salt Lake City, Utah, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 546.1,
+        "durationHours": 11.2,
+        "arrival": "2026-10-22T05:39:26.400000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:55:34.258880+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:26:27.517761+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:57:20.776641+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:28:14.035521+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:59:07.294401+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:30:00.553281+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:00:53.812162+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:31:47.071042+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:02:40.329922+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:33:33.588802+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-22T00:04:26.847682+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:35:20.106563+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T01:06:13.365443+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T01:37:06.624323+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T02:07:59.883204+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T02:38:53.142084+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T03:09:46.400964+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 450,
+            "eta": "2026-10-22T03:40:39.659844+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T04:00",
+            "risk": "High"
+          },
+          {
+            "mile": 475,
+            "eta": "2026-10-22T04:11:32.918724+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T04:00",
+            "risk": "High"
+          },
+          {
+            "mile": 500,
+            "eta": "2026-10-22T04:42:26.177605+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T05:00",
+            "risk": "High"
+          },
+          {
+            "mile": 525,
+            "eta": "2026-10-22T05:13:19.436485+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T05:00",
+            "risk": "High"
+          },
+          {
+            "mile": 546.1,
+            "eta": "2026-10-22T05:39:26.400000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T06:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 546.1,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "546 miles · 11.2 hr · Denver, Colorado, United States to Salt Lake City, Utah, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 565.1,
+        "durationHours": 12.0,
+        "arrival": "2026-10-22T06:26:32.600000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:56:37.185677+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:28:33.371354+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:00:29.557031+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:32:25.742708+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:04:21.928385+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:36:18.114062+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:08:14.299738+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:40:10.485415+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:12:06.671092+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:44:02.856769+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-22T00:15:59.042446+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:47:55.228123+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T01:19:51.413800+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "High"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T01:51:47.599477+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T02:23:43.785154+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "High"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T02:55:39.970831+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 425,
+            "eta": "2026-10-22T03:27:36.156508+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "High"
+          },
+          {
+            "mile": 450,
+            "eta": "2026-10-22T03:59:32.342185+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T04:00",
+            "risk": "High"
+          },
+          {
+            "mile": 475,
+            "eta": "2026-10-22T04:31:28.527862+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T05:00",
+            "risk": "High"
+          },
+          {
+            "mile": 500,
+            "eta": "2026-10-22T05:03:24.713538+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T05:00",
+            "risk": "High"
+          },
+          {
+            "mile": 525,
+            "eta": "2026-10-22T05:35:20.899215+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T06:00",
+            "risk": "High"
+          },
+          {
+            "mile": 550,
+            "eta": "2026-10-22T06:07:17.084892+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T06:00",
+            "risk": "High"
+          },
+          {
+            "mile": 565.1,
+            "eta": "2026-10-22T06:26:32.600000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T06:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 565.1,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "565 miles · 12.0 hr · Denver, Colorado, United States to Salt Lake City, Utah, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

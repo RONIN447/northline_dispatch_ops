@@ -28,6 +28,7 @@ from routing.views import (
     parse_load_weight,
     parse_location_name,
     RouteAlternativesUnavailable,
+    _weather_for_point_cached,
 )
 
 
@@ -88,6 +89,11 @@ class RiskClassificationTests(unittest.TestCase):
 
     def test_highest_weather_risk_wins(self):
         self.assertEqual(classify_checkpoint_risk(25, 0.6, 0.5, 20_000), "Severe")
+
+    def test_missing_forecast_risk_is_at_least_severe(self):
+        self.assertEqual(classify_checkpoint_risk(None, 0, 0, 20_000), "Severe")
+        self.assertEqual(classify_checkpoint_risk(None, 0, 3.1, 20_000), "No Travel")
+        self.assertEqual(classify_checkpoint_risk(None, None, None, 20_000), "No Travel")
 
 
 class InputValidationTests(unittest.TestCase):
@@ -173,9 +179,36 @@ class RouteGeometryTests(unittest.TestCase):
         self.assertEqual(summary["noTravelMiles"], 1.0)
         self.assertEqual(summary["severeMiles"], 1.0)
 
+    def test_route_summary_preserves_forecast_gaps_as_severe_risk(self):
+        missing_wind = {
+            "windMph": None,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": 70,
+            "forecastHour": "2026-10-10T12:00",
+        }
+        summary = build_route_summary(
+            {
+                "distance": 1609.344,
+                "duration": 3600,
+                "geometry": {"coordinates": [[-120, 36], [-119.98, 36]]},
+            },
+            {"label": "Origin"},
+            {"label": "Destination"},
+            datetime(2026, 10, 10, 12, tzinfo=timezone.utc),
+            20_000,
+            10,
+            1,
+            [dict(missing_wind), dict(missing_wind)],
+        )
+        self.assertEqual(summary["severeMiles"], 1.0)
+        self.assertTrue(all(item["risk"] == "Severe" for item in summary["checkpoints"]))
+        self.assertTrue(all(item["windMph"] is None for item in summary["checkpoints"]))
+
 
 class WeatherForecastTests(unittest.TestCase):
     def setUp(self):
+        _weather_for_point_cached.cache_clear()
         self.arrival = datetime(2026, 10, 10, 12, 20, tzinfo=timezone.utc)
         self.hourly = {
             "time": ["2026-10-10T11:00", "2026-10-10T12:00", "2026-10-10T13:00"],
@@ -261,13 +294,20 @@ class WeatherForecastTests(unittest.TestCase):
             get_weather_at(37, -120, far_future)
 
     @patch("routing.views.requests.get")
-    def test_missing_or_invalid_risk_variable_fails_closed(self, get):
+    def test_missing_risk_variable_is_returned_as_a_forecast_gap(self, get):
         missing_wind = dict(self.hourly)
         missing_wind["wind_speed_10m"] = [0, None, 0]
         get.return_value = self.mock_response(missing_wind)
-        with self.assertRaises(WeatherDataUnavailable):
-            get_weather_at(37, -120, self.arrival)
+        weather = get_weather_at(37, -120, self.arrival)
+        self.assertIsNone(weather["windMph"])
+        self.assertEqual(classify_checkpoint_risk(
+            weather["windMph"],
+            weather["rainInHr"],
+            weather["snowInHr"],
+            20_000,
+        ), "Severe")
 
+        _weather_for_point_cached.cache_clear()
         invalid_rain = dict(self.hourly)
         invalid_rain["rain"] = [0, float("nan"), 0]
         get.return_value = self.mock_response(invalid_rain)

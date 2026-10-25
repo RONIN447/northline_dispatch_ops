@@ -1,0 +1,425 @@
+{
+  "id": "forecast_gap_5_dallas_to_houston",
+  "category": "forecast_unavailable",
+  "description": "Wind forecast is unavailable at one recommended-route checkpoint.",
+  "tags": [
+    "synthetic",
+    "forecast_gap",
+    "wind_unavailable"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 41000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Dallas, Texas, United States",
+      "lat": 32.78306,
+      "lon": -96.80667,
+      "timezone": "America/Chicago"
+    },
+    "destination": {
+      "label": "Houston, Texas, United States",
+      "lat": 29.76328,
+      "lon": -95.36327,
+      "timezone": "America/Chicago"
+    },
+    "routes": [
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 252.6,
+        "durationHours": 5.1,
+        "arrival": "2026-10-21T23:30:13.900000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:54:55.533943+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:25:10.067886+00:00",
+            "windMph": 5.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:55:24.601829+00:00",
+            "windMph": 6.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:25:39.135771+00:00",
+            "windMph": 6.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:55:53.669714+00:00",
+            "windMph": 7.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:26:08.203657+00:00",
+            "windMph": 7.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:56:22.737600+00:00",
+            "windMph": 6.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:26:37.271543+00:00",
+            "windMph": 8.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:56:51.805485+00:00",
+            "windMph": 8.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:27:06.339428+00:00",
+            "windMph": 4.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 252.6,
+            "eta": "2026-10-21T23:30:13.900000+00:00",
+            "windMph": 2.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "253 miles · 5.1 hr · Dallas, Texas, United States to Houston, Texas, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 267.0,
+        "durationHours": 5.3,
+        "arrival": "2026-10-21T23:39:49+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:54:11.345162+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:23:41.690325+00:00",
+            "windMph": 5.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:53:12.035487+00:00",
+            "windMph": 1.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:22:42.380650+00:00",
+            "windMph": 3.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:52:12.725812+00:00",
+            "windMph": 6.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:21:43.070974+00:00",
+            "windMph": 7.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:51:13.416137+00:00",
+            "windMph": 6.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:20:43.761299+00:00",
+            "windMph": 7.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:50:14.106462+00:00",
+            "windMph": 8.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:19:44.451624+00:00",
+            "windMph": 2.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 267.0,
+            "eta": "2026-10-21T23:39:49+00:00",
+            "windMph": 2.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "267 miles · 5.3 hr · Dallas, Texas, United States to Houston, Texas, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 240.0,
+        "durationHours": 4.3,
+        "arrival": "2026-10-21T22:39:43.300000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:51:15.216924+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:17:49.433848+00:00",
+            "windMph": null,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Severe"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:44:23.650772+00:00",
+            "windMph": 5.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:10:57.867696+00:00",
+            "windMph": 5.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:37:32.084620+00:00",
+            "windMph": 7.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:04:06.301544+00:00",
+            "windMph": 6.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:30:40.518468+00:00",
+            "windMph": 7.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T21:57:14.735392+00:00",
+            "windMph": 8.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:23:48.952316+00:00",
+            "windMph": 2.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 240.0,
+            "eta": "2026-10-21T22:39:43.300000+00:00",
+            "windMph": 3.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 25,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.31,
+        "summary": "240 miles · 4.3 hr · Dallas, Texas, United States to Houston, Texas, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-2-routability",
+    "forecastHours": 48
+  }
+}

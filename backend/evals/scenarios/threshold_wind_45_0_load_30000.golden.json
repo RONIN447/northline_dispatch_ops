@@ -1,0 +1,596 @@
+{
+  "id": "threshold_wind_45_0_load_30000",
+  "category": "threshold_boundary",
+  "description": "Boundary check: 45.0 mph wind with 30,000 lb load should rate Severe.",
+  "tags": [
+    "synthetic",
+    "wind_45.0mph",
+    "load_30000lb",
+    "expected_Severe"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 30000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "San Francisco, California, United States",
+      "lat": 37.77493,
+      "lon": -122.41942,
+      "timezone": "America/Los_Angeles"
+    },
+    "destination": {
+      "label": "Los Angeles, California, United States",
+      "lat": 34.05223,
+      "lon": -118.24368,
+      "timezone": "America/Los_Angeles"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 380.8,
+        "durationHours": 7.1,
+        "arrival": "2026-10-22T01:31:05.300000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:52:40.467757+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:20:39.935513+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:48:39.403269+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:16:38.871026+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:44:38.338782+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:12:37.806538+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:40:37.274295+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:08:36.742051+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:36:36.209808+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:04:35.677564+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:32:35.145320+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:00:34.613077+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:28:34.080833+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T00:56:33.548589+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T01:24:33.016346+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 380.8,
+            "eta": "2026-10-22T01:31:05.300000+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "381 miles · 7.1 hr · San Francisco, California, United States to Los Angeles, California, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 393.3,
+        "durationHours": 7.4,
+        "arrival": "2026-10-22T01:46:14.100000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:52:44.985991+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:20:48.971982+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:48:52.957973+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:16:56.943964+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:45:00.929955+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:13:04.915946+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:41:08.901937+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:09:12.887928+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:37:16.873919+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:05:20.859910+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:33:24.845901+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T00:01:28.831892+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T00:29:32.817883+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T00:57:36.803874+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T01:25:40.789865+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 393.3,
+            "eta": "2026-10-22T01:46:14.100000+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "393 miles · 7.4 hr · San Francisco, California, United States to Los Angeles, California, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 416.0,
+        "durationHours": 9.4,
+        "arrival": "2026-10-22T03:47:00.900000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:58:28.761225+00:00",
+            "windMph": 45.0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Severe"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:32:16.522450+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:06:04.283676+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:39:52.044901+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:13:39.806126+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:47:27.567351+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:21:15.328577+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:55:03.089802+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:28:50.851027+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-22T00:02:38.612252+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-22T00:36:26.373477+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 300,
+            "eta": "2026-10-22T01:10:14.134703+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T01:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 325,
+            "eta": "2026-10-22T01:44:01.895928+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 350,
+            "eta": "2026-10-22T02:17:49.657153+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T02:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 375,
+            "eta": "2026-10-22T02:51:37.418378+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 400,
+            "eta": "2026-10-22T03:25:25.179604+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T03:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 416.0,
+            "eta": "2026-10-22T03:47:00.900000+00:00",
+            "windMph": 0,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T04:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 25,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.18,
+        "summary": "416 miles · 9.4 hr · San Francisco, California, United States to Los Angeles, California, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

@@ -44,7 +44,7 @@ Dispatchers enter an origin, destination, departure time, cargo weight, and chec
 - **Load-aware risk:** applies cargo-weight adjustments to the weather risk assessment.
 - **Explainable recommendations:** ranks route options using severe exposure first, followed by high-risk miles, distance-weighted average risk, and duration.
 - **Interactive map:** displays route geometry, checkpoint conditions, risk overlays, and a 0-48 hour departure forecast.
-- **Fail-closed forecast handling:** reports unavailable forecast data instead of presenting missing weather as safe.
+- **Fail-safe forecast gaps:** missing wind, rain, or snow data is reported explicitly and raises checkpoint risk to at least Severe; a checkpoint with all three unavailable is No Travel.
 
 ### Risk assessment
 
@@ -55,6 +55,8 @@ Dispatchers enter an origin, destination, departure time, cargo weight, and chec
 | Snow (in/hr) | <0.5 | 0.5-<1.0 | 1.0-<2.0 | 2.0-3.0 | >3.0 |
 
 Additional load rules: wind from 45 to under 55 mph becomes **No Travel** above 30,000 lb; wind from 35 to under 45 mph is at least **Severe** above 40,000 lb. Wind at or above 55 mph is **No Travel** for every load.
+
+If one or more core forecast measurements (wind, rain, or snow) is unavailable, the checkpoint is rated at least **Severe**; if all three are unavailable, it is **No Travel**. This keeps incomplete forecasts visible as a data gap without treating them as safe.
 
 ## Architecture
 
@@ -150,11 +152,14 @@ Run the backend regression tests:
 
 ```powershell
 cd backend
-python -m unittest routing.test_risk_rules briefing.tests
+python -m unittest routing.test_risk_rules briefing.tests evals.test_scenarios
+python -m evals.build_scenarios
 ```
 
 The briefing tests validate the captured route-plan responses against the
-Python 3.9-compatible Pydantic models.
+Python 3.9-compatible Pydantic models. The scenario generator rebuilds the
+golden dataset from `evals/scenarios/raw/`, uses the routing engine for risk
+and recommendation calculations, and prints a review table.
 
 ### Briefing providers
 
@@ -229,6 +234,10 @@ The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing
 
 ```text
 backend/
+  evals/
+    build_scenarios.py  # Reproducible golden dataset generator
+    scenarios/          # Generated cases and original route-plan captures
+    test_scenarios.py   # Dataset integrity and engine consistency checks
   routing/
     test_risk_rules.py   # Risk thresholds, forecast handling, API regressions
     views.py             # Geocoding, routing, weather sampling, scoring

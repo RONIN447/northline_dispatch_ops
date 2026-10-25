@@ -1,0 +1,395 @@
+{
+  "id": "all_routes_risky_3_boston_to_new_york",
+  "category": "all_routes_risky",
+  "description": "All routes have High wind risk at every checkpoint.",
+  "tags": [
+    "synthetic",
+    "all_routes_risky",
+    "wind_36mph"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 28000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Boston, Massachusetts, United States",
+      "lat": 42.35843,
+      "lon": -71.05977,
+      "timezone": "America/New_York"
+    },
+    "destination": {
+      "label": "New York, New York, United States",
+      "lat": 40.71427,
+      "lon": -74.00597,
+      "timezone": "America/New_York"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 214.1,
+        "durationHours": 4.7,
+        "arrival": "2026-10-21T23:06:03.100000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:57:32.452463+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:30:23.904927+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:03:15.357390+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:36:06.809854+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:08:58.262317+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:41:49.714781+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:14:41.167244+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:47:32.619708+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 214.1,
+            "eta": "2026-10-21T23:06:03.100000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 214.1,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "214 miles · 4.7 hr · Boston, Massachusetts, United States to New York, New York, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 231.5,
+        "durationHours": 5.0,
+        "arrival": "2026-10-21T23:27:19.300000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:57:22.027697+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:30:03.055394+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:02:44.083091+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:35:25.110788+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:08:06.138485+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:40:47.166182+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:13:28.193879+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:46:09.221575+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:18:50.249273+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 231.5,
+            "eta": "2026-10-21T23:27:19.300000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 231.5,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "231 miles · 5.0 hr · Boston, Massachusetts, United States to New York, New York, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 239.8,
+        "durationHours": 5.4,
+        "arrival": "2026-10-21T23:50:43.400000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "High"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:58:40.203363+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "High"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:32:39.406726+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T20:06:38.610089+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "High"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:40:37.813452+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:14:37.016816+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "High"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:48:36.220179+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:22:35.423542+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "High"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:56:34.626905+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "High"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:30:33.830268+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          },
+          {
+            "mile": 239.8,
+            "eta": "2026-10-21T23:50:43.400000+00:00",
+            "windMph": 36,
+            "rainInHr": 0,
+            "snowInHr": 0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "High"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 239.8,
+        "noTravelMiles": 0,
+        "averageRisk": 2.0,
+        "summary": "240 miles · 5.4 hr · Boston, Massachusetts, United States to New York, New York, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}

@@ -1,0 +1,464 @@
+{
+  "id": "normal_chicago_to_detroit",
+  "category": "normal_trip",
+  "description": "Captured baseline trip with engine-recomputed risks.",
+  "tags": [
+    "captured",
+    "baseline"
+  ],
+  "engine_input": {
+    "load_weight_lbs": 30000.0,
+    "interval_miles": 25,
+    "departure": "2026-10-21T18:24:41+00:00"
+  },
+  "plan": {
+    "origin": {
+      "label": "Chicago, Illinois, United States",
+      "lat": 41.85003,
+      "lon": -87.65005,
+      "timezone": "America/Chicago"
+    },
+    "destination": {
+      "label": "Detroit, Michigan, United States",
+      "lat": 42.33143,
+      "lon": -83.04575,
+      "timezone": "America/Detroit"
+    },
+    "routes": [
+      {
+        "id": "route-1-routability",
+        "distanceMiles": 280.9,
+        "durationHours": 5.3,
+        "arrival": "2026-10-21T23:40:49.700000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:52:49.073751+00:00",
+            "windMph": 0.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:20:57.147502+00:00",
+            "windMph": 2.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:49:05.221253+00:00",
+            "windMph": 4.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:17:13.295004+00:00",
+            "windMph": 5.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:45:21.368754+00:00",
+            "windMph": 3.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:13:29.442505+00:00",
+            "windMph": 3.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:41:37.516256+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:09:45.590007+00:00",
+            "windMph": 3.5,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:37:53.663758+00:00",
+            "windMph": 1.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:06:01.737509+00:00",
+            "windMph": 2.0,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:34:09.811260+00:00",
+            "windMph": 4.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 280.9,
+            "eta": "2026-10-21T23:40:49.700000+00:00",
+            "windMph": 4.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "281 miles · 5.3 hr · Chicago, Illinois, United States to Detroit, Michigan, United States",
+        "recommended": true
+      },
+      {
+        "id": "route-2-routability",
+        "distanceMiles": 295.9,
+        "durationHours": 5.7,
+        "arrival": "2026-10-22T00:06:56.200000+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:53:36.034641+00:00",
+            "windMph": 0.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:22:31.069283+00:00",
+            "windMph": 1.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:51:26.103924+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:20:21.138565+00:00",
+            "windMph": 0.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T20:49:16.173207+00:00",
+            "windMph": 2.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:18:11.207848+00:00",
+            "windMph": 4.8,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T21:47:06.242489+00:00",
+            "windMph": 1.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:16:01.277130+00:00",
+            "windMph": 2.4,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T22:44:56.311772+00:00",
+            "windMph": 5.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:13:51.346413+00:00",
+            "windMph": 5.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-21T23:42:46.381054+00:00",
+            "windMph": 5.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 295.9,
+            "eta": "2026-10-22T00:06:56.200000+00:00",
+            "windMph": 4.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "296 miles · 5.7 hr · Chicago, Illinois, United States to Detroit, Michigan, United States",
+        "recommended": false
+      },
+      {
+        "id": "route-3-routability",
+        "distanceMiles": 284.8,
+        "durationHours": 6.0,
+        "arrival": "2026-10-22T00:26:34+00:00",
+        "checkpoints": [
+          {
+            "mile": 0,
+            "eta": "2026-10-21T18:24:41+00:00",
+            "windMph": 1.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T18:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 25,
+            "eta": "2026-10-21T18:56:26.699822+00:00",
+            "windMph": 0.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 50,
+            "eta": "2026-10-21T19:28:12.399644+00:00",
+            "windMph": 1.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T19:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 75,
+            "eta": "2026-10-21T19:59:58.099466+00:00",
+            "windMph": 1.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T20:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 100,
+            "eta": "2026-10-21T20:31:43.799288+00:00",
+            "windMph": 0.3,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 125,
+            "eta": "2026-10-21T21:03:29.499110+00:00",
+            "windMph": 1.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T21:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 150,
+            "eta": "2026-10-21T21:35:15.198931+00:00",
+            "windMph": 2.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 175,
+            "eta": "2026-10-21T22:07:00.898753+00:00",
+            "windMph": 3.1,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T22:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 200,
+            "eta": "2026-10-21T22:38:46.598575+00:00",
+            "windMph": 5.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 225,
+            "eta": "2026-10-21T23:10:32.298397+00:00",
+            "windMph": 3.2,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-21T23:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 250,
+            "eta": "2026-10-21T23:42:17.998219+00:00",
+            "windMph": 4.9,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 275,
+            "eta": "2026-10-22T00:14:03.698041+00:00",
+            "windMph": 4.7,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          },
+          {
+            "mile": 284.8,
+            "eta": "2026-10-22T00:26:34+00:00",
+            "windMph": 4.6,
+            "rainInHr": 0.0,
+            "snowInHr": 0.0,
+            "temperatureF": null,
+            "forecastHour": "2026-10-22T00:00",
+            "risk": "Low"
+          }
+        ],
+        "severeMiles": 0,
+        "highMiles": 0,
+        "noTravelMiles": 0,
+        "averageRisk": 0.0,
+        "summary": "285 miles · 6.0 hr · Chicago, Illinois, United States to Detroit, Michigan, United States",
+        "recommended": false
+      }
+    ],
+    "recommendedRouteId": "route-1-routability",
+    "forecastHours": 48
+  }
+}
