@@ -121,6 +121,7 @@ Environment variable examples are documented in [`.env.example`](./.env.example)
 | --- | --- | --- |
 | `GET` | `/api/health/` | Render health check; returns `{"status":"ok"}` |
 | `POST` | `/api/plan/` | Geocode locations, score available routes, and return the recommendation |
+| `POST` | `/api/briefing/` | Generate and validate a dispatch briefing from a route-plan JSON body |
 
 Example request:
 
@@ -135,6 +136,13 @@ Example request:
 ```
 
 The plan response includes the resolved endpoints, available route geometries, checkpoint ETAs and forecast conditions, risk summaries, and `recommendedRouteId`. Invalid input returns a client error with an explanatory message; unavailable forecast data is not silently classified as safe.
+
+Post the complete `/api/plan/` response as JSON to `/api/briefing/`. The briefing
+endpoint accepts request bodies up to 1 MB (to accommodate route geometry),
+applies a per-IP in-memory rate limit, and returns the briefing, structured interventions, a `fallback_used`
+flag, and generation metadata. Invalid JSON and plan shapes return 400, oversized
+bodies return 413, rate-limited requests return 429, and provider/generation
+failures return 502.
 
 ## Tests and build
 
@@ -156,7 +164,8 @@ It defaults to the deterministic mock provider:
 
 ```powershell
 $env:LLM_PROVIDER = "mock"
-$env:MOCK_MODE = "normal" # faulty, faulty_downgrade, faulty_no_gap exercise checks
+$env:MOCK_MODE = "normal" # faulty_route, faulty_missing_checkpoint, faulty_number,
+                          # faulty_downgrade, faulty_no_gap each exercise one check
 ```
 
 Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
@@ -173,6 +182,12 @@ after retry raises a generation error. Hosted requests use temperature 0 and a
 prompt, token, latency, and retry metadata. The system prompt is versioned as
 `v1`; behavioral safety checks are implemented separately from this generation
 step.
+
+`briefing.validator.enforce(plan, briefing)` applies deterministic safety
+corrections and returns `(final_briefing, interventions, fallback_used)`.
+Count interventions by `rule` and `fallback_used` to track how often generated
+text must be replaced; the validator verifies its result with the shared
+evaluation checks before returning.
 
 Build the frontend for production:
 
@@ -197,6 +212,7 @@ The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing
 
 ## Limitations and safety
 
+- `/api/briefing/` trusts the route-plan JSON submitted by the caller; it does not recompute trips or independently verify caller-supplied route and weather data. The response is only grounded in that submitted plan. The per-IP rate limit helps control provider cost; recomputing plans server-side is deferred.
 - OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
 - Weather is sampled from hourly forecast data; conditions can change between forecast hours and checkpoints.
 - OSRM may not be able to find three distinct drivable routes for every pair of locations. In that case, planning fails with an explanation instead of showing fewer than three options or presenting duplicate paths as alternatives.
