@@ -5,7 +5,7 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from routing.risk_levels import RISK_LEVELS
+from routing.risk_levels import HIGH, RISK_LEVELS, RISK_SCORES
 from routing.views import (
     parse_checkpoint_spacing,
     parse_load_weight,
@@ -69,6 +69,30 @@ def _make_scenario(
     if mutate is not None:
         mutate(plan)
     plan = _strip_geometry(_recompute_plan(plan, weight))
+    expected_risks = []
+    expected_gaps = []
+    risk_counts = Counter()
+    for route in plan["routes"]:
+        for index, checkpoint in enumerate(route["checkpoints"]):
+            risk = checkpoint["risk"]
+            risk_counts[risk] += 1
+            if risk in RISK_SCORES and RISK_SCORES[risk] >= RISK_SCORES[HIGH]:
+                expected_risks.append(
+                    {
+                        "route_id": route["id"],
+                        "checkpoint_index": index,
+                        "level": risk,
+                    }
+                )
+            missing = [
+                field for field in WEATHER_FIELDS if checkpoint.get(field) is None
+            ]
+            if missing:
+                expected_gaps.append(
+                    "{} checkpoint {} is missing {}.".format(
+                        route["id"], index, ", ".join(missing)
+                    )
+                )
     return {
         "id": scenario_id,
         "category": category,
@@ -80,6 +104,15 @@ def _make_scenario(
             "departure": request["departure"],
         },
         "plan": plan,
+        "expect": {
+            "recommended_route_id": plan["recommendedRouteId"],
+            "risk_counts": {
+                level: risk_counts[level]
+                for level in RISK_LEVELS
+            },
+            "risky_checkpoints": expected_risks,
+            "data_gaps": expected_gaps,
+        },
     }
 
 

@@ -591,5 +591,278 @@
     ],
     "recommendedRouteId": "route-1-routability",
     "forecastHours": 48
+  },
+  "expect": {
+    "recommended_route_id": "route-1-routability",
+    "risk_counts": {
+      "Low": 0,
+      "Moderate": 0,
+      "High": 52,
+      "Severe": 0,
+      "No Travel": 0
+    },
+    "risky_checkpoints": [
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 0,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 1,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 2,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 3,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 4,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 5,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 6,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 7,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 8,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 9,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 10,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 11,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 12,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 13,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 14,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 15,
+        "level": "High"
+      },
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 16,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 0,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 1,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 2,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 3,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 4,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 5,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 6,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 7,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 8,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 9,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 10,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 11,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 12,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 13,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 14,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 15,
+        "level": "High"
+      },
+      {
+        "route_id": "route-2-routability",
+        "checkpoint_index": 16,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 0,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 1,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 2,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 3,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 4,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 5,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 6,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 7,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 8,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 9,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 10,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 11,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 12,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 13,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 14,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 15,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 16,
+        "level": "High"
+      },
+      {
+        "route_id": "route-3-routability",
+        "checkpoint_index": 17,
+        "level": "High"
+      }
+    ],
+    "data_gaps": []
   }
 }
