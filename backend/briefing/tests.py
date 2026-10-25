@@ -1,9 +1,14 @@
+import json
+import os
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 from pydantic import ValidationError
 
-from briefing.schema import BriefingRoutePlan
+from briefing.providers import MockProvider, get_provider
+from briefing.schema import Briefing, BriefingRoutePlan
+from evals.checks import validate_briefing
 from routing.risk_levels import RISK_LEVELS
 
 
@@ -90,3 +95,93 @@ class BriefingRoutePlanTests(unittest.TestCase):
             "recommendedRouteId": "route-1",
             "forecastHours": 48,
         }
+
+
+class BriefingProviderTests(unittest.TestCase):
+    def setUp(self):
+        response_file = (
+            Path(__file__).resolve().parents[1]
+            / "evals"
+            / "scenarios"
+            / "raw"
+            / "01_sfo_to_lax.response.json"
+        )
+        self.route_plan = json.loads(response_file.read_text(encoding="utf-8"))
+        recommended_route = next(
+            route
+            for route in self.route_plan["routes"]
+            if route["id"] == self.route_plan["recommendedRouteId"]
+        )
+        recommended_route["checkpoints"][0]["risk"] = "Severe"
+        self.user = json.dumps(self.route_plan)
+
+    def test_normal_mock_produces_a_briefing_that_passes_checks(self):
+        response = MockProvider(mode="normal").generate("Return briefing JSON.", self.user)
+        briefing = Briefing.model_validate_json(response.text)
+
+        self.assertGreater(response.tokens, 0)
+        self.assertGreaterEqual(response.latency_ms, 0)
+        self.assertEqual(validate_briefing(briefing, self.route_plan), [])
+
+    def test_faulty_mock_is_caught_for_route_risk_and_invented_number(self):
+        response = MockProvider(mode="faulty").generate("Return briefing JSON.", self.user)
+        briefing = Briefing.model_validate_json(response.text)
+
+        self.assertEqual(
+            set(validate_briefing(briefing, self.route_plan)),
+            {
+                "recommended_route_mismatch",
+                "risky_checkpoint_mismatch",
+                "unsupported_number",
+            },
+        )
+
+    def test_faulty_downgrade_is_caught_by_shared_check(self):
+        response = MockProvider(mode="faulty_downgrade").generate(
+            "Return briefing JSON.", self.user
+        )
+        briefing = Briefing.model_validate_json(response.text)
+
+        self.assertIn("risky_checkpoint_mismatch", validate_briefing(briefing, self.route_plan))
+
+    def test_faulty_no_gap_is_caught_by_shared_check(self):
+        checkpoint = self.route_plan["routes"][0]["checkpoints"][0]
+        checkpoint.pop("windMph")
+        user = json.dumps(self.route_plan)
+        response = MockProvider(mode="faulty_no_gap").generate("Return briefing JSON.", user)
+        briefing = Briefing.model_validate_json(response.text)
+
+        self.assertIn("data_gap_mismatch", validate_briefing(briefing, self.route_plan))
+
+    def test_provider_selection_uses_environment(self):
+        with patch.dict(os.environ, {"LLM_PROVIDER": "mock", "MOCK_MODE": "faulty"}):
+            provider = get_provider()
+
+        self.assertIsInstance(provider, MockProvider)
+        self.assertEqual(provider.mode, "faulty")
+
+    def test_unknown_provider_is_an_error(self):
+        with patch.dict(os.environ, {"LLM_PROVIDER": "unknown"}):
+            with self.assertRaisesRegex(ValueError, "LLM_PROVIDER"):
+                get_provider()
+
+    def test_non_mock_provider_requires_an_api_key(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(ValueError, "ANTHROPIC_API_KEY"):
+                get_provider("anthropic")
+            with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
+                get_provider("openai")
+
+    def test_non_mock_provider_requires_model_environment_variable(self):
+        with patch.dict(
+            os.environ,
+            {
+                "ANTHROPIC_API_KEY": "test-key",
+                "OPENAI_API_KEY": "test-key",
+            },
+            clear=True,
+        ):
+            with self.assertRaisesRegex(ValueError, "ANTHROPIC_MODEL"):
+                get_provider("anthropic")
+            with self.assertRaisesRegex(ValueError, "OPENAI_MODEL"):
+                get_provider("openai")
