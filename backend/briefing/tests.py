@@ -690,6 +690,7 @@ class BriefingEndpointTests(unittest.TestCase):
     def test_global_daily_limit_applies_across_client_ips(self):
         from briefing import views
 
+        self.assertEqual(views.DAILY_REQUEST_LIMIT, 500)
         with patch.object(views, "DAILY_REQUEST_LIMIT", 1):
             with patch.dict(os.environ, {"LLM_PROVIDER": "mock"}):
                 first = self._post_plan(remote_addr="192.0.2.1")
