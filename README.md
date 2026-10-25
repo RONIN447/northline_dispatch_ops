@@ -174,6 +174,12 @@ that verifies the evaluation pipeline and deterministic guardrails only, not
 the quality of a real model's raw output. Run `python -m django run_evals`
 without `--gate` to generate a report locally without enforcing thresholds.
 
+The gate was verified with an intentionally broken validator and
+`MOCK_MODE=faulty_number` on a temporary branch. The run failed as expected on
+the `numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467).
+
+![GitHub Actions showing the intentional evaluation-gate failure](docs/images/eval-gate-failure.png)
+
 ### Briefing providers
 
 The briefing provider interface accepts a system instruction and a JSON-encoded
