@@ -761,5 +761,25 @@
     ],
     "recommendedRouteId": "route-3-routability",
     "forecastHours": 48
+  },
+  "expect": {
+    "recommended_route_id": "route-3-routability",
+    "risk_counts": {
+      "Low": 68,
+      "Moderate": 0,
+      "High": 0,
+      "Severe": 1,
+      "No Travel": 0
+    },
+    "risky_checkpoints": [
+      {
+        "route_id": "route-1-routability",
+        "checkpoint_index": 2,
+        "level": "Severe"
+      }
+    ],
+    "data_gaps": [
+      "route-1-routability checkpoint 2 is missing windMph."
+    ]
   }
 }

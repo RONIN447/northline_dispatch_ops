@@ -30,7 +30,7 @@ jobs:
         env:
           DJANGO_SETTINGS_MODULE: settings
           DEBUG: "True"
-        run: python -m unittest routing.test_risk_rules briefing.tests evals.test_scenarios
+        run: python -m unittest routing.test_risk_rules briefing.tests evals.test_scenarios evals.test_checks evals.test_runner
 
   frontend-build:
     name: Frontend production build
@@ -48,3 +48,23 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+
+  eval-quality-gate:
+    name: Briefing evaluation quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies
+        run: python -m pip install -r backend/requirements.txt
+      - name: Run mock-backed evaluation gate
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: settings
+          DEBUG: "True"
+          LLM_PROVIDER: mock
+        run: python -m django run_evals --gate

@@ -9,8 +9,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 django.setup()
 
 from briefing.views import _validate_plan_shape
+from evals.checks import expected_data_gaps, expected_risky_checkpoints
 from evals.scenarios import EXPECTED_CATEGORY_COUNTS, load_scenarios
-from routing.risk_levels import HIGH, LOW, NO_TRAVEL, RISK_SCORES
+from routing.risk_levels import HIGH, LOW, NO_TRAVEL, RISK_LEVELS, RISK_SCORES
 from routing.views import rank_route_summaries, recompute_route_risk_summary
 
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
@@ -79,6 +80,37 @@ class GoldenScenarioTests(unittest.TestCase):
                         [item["risk"] for item in actual["checkpoints"]],
                         [item["risk"] for item in expected["checkpoints"]],
                     )
+
+    def test_every_scenario_expectation_matches_its_plan(self):
+        for scenario in self.scenarios:
+            with self.subTest(scenario=scenario["id"]):
+                expected = scenario["expect"]
+                plan = scenario["plan"]
+                risks = Counter(
+                    checkpoint["risk"]
+                    for route in plan["routes"]
+                    for checkpoint in route["checkpoints"]
+                )
+                expected_risky = [
+                    {
+                        "route_id": route_id,
+                        "checkpoint_index": checkpoint_index,
+                        "level": level,
+                    }
+                    for route_id, checkpoint_index, level in expected_risky_checkpoints(
+                        plan
+                    )
+                ]
+                self.assertEqual(
+                    expected["recommended_route_id"],
+                    plan["recommendedRouteId"],
+                )
+                self.assertEqual(
+                    expected["risk_counts"],
+                    {level: risks[level] for level in RISK_LEVELS},
+                )
+                self.assertEqual(expected["risky_checkpoints"], expected_risky)
+                self.assertEqual(expected["data_gaps"], expected_data_gaps(plan))
 
     def test_severe_scenarios_include_severe_or_no_travel_checkpoints(self):
         scenarios = self._in_category("severe_or_no_travel")

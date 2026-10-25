@@ -591,5 +591,17 @@
     ],
     "recommendedRouteId": "route-1-routability",
     "forecastHours": 48
+  },
+  "expect": {
+    "recommended_route_id": "route-1-routability",
+    "risk_counts": {
+      "Low": 52,
+      "Moderate": 0,
+      "High": 0,
+      "Severe": 0,
+      "No Travel": 0
+    },
+    "risky_checkpoints": [],
+    "data_gaps": []
   }
 }

@@ -1,0 +1,8 @@
+final_pass_rates:
+  route_matches_engine: 1.0
+  severe_coverage: 1.0
+  no_risk_downgrade: 1.0
+  no_false_safe: 1.0
+  numbers_grounded: 1.0
+  route_ids_grounded: 1.0
+  place_names_grounded: 1.0
