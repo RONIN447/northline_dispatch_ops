@@ -22,15 +22,15 @@ Compare driving routes using forecast weather, truck load, and travel time. Revi
 
 </div>
 
-<p align="center">
+<!-- <p align="center">
   <img src="./docs/images/route-planner.png" alt="Northline Dispatch Ops planner dashboard with trip inputs, corridor map, and route options" width="100%">
-</p>
+</p> -->
 
-<details>
+<!-- <details>
   <summary><strong>View a route recommendation and checkpoint forecast</strong></summary>
   <br>
   <img src="./docs/images/route-recommendation.png" alt="Boston to New York route recommendation with three route options, a corridor map, and checkpoint conditions" width="100%">
-</details>
+</details> -->
 
 ## What it does
 
