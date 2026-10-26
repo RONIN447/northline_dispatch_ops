@@ -178,7 +178,6 @@ The gate was verified with an intentionally broken validator and
 `MOCK_MODE=faulty_number` on a temporary branch. The run failed as expected on
 the `numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467).
 
-![GitHub Actions showing the intentional evaluation-gate failure](docs/images/eval-gate-failure.png)
 
 ### Briefing providers
 
