@@ -176,7 +176,7 @@ without `--gate` to generate a report locally without enforcing thresholds.
 
 The gate was verified with an intentionally broken validator and
 `MOCK_MODE=faulty_number` on a temporary branch. The run failed as expected on
-the `numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467).
+the `numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467)
 
 
 ### Briefing providers
@@ -187,9 +187,7 @@ It defaults to the deterministic mock provider:
 
 ```powershell
 $env:LLM_PROVIDER = "mock"
-$env:MOCK_MODE = "normal" # faulty_route, faulty_missing_checkpoint, faulty_number,
-                          # faulty_downgrade, faulty_no_gap, faulty_route_id,
-                          # faulty_place each exercise a specific check
+$env:MOCK_MODE = "normal" 
 ```
 
 Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
