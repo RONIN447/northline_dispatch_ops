@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title description">
+  <title id="title">Mock briefing evaluation results</title>
+  <desc id="description">Twenty-eight scenarios passed all seven checks for both raw and validator-corrected mock briefings. The validator made no interventions. These results verify the deterministic pipeline, not real-model quality.</desc>
+  <rect width="960" height="430" rx="16" fill="#f5f8f7"/>
+  <text x="40" y="54" fill="#173b34" font-family="Arial, sans-serif" font-size="28" font-weight="700">Briefing evaluation — mock provider</text>
+  <text x="40" y="86" fill="#4d625d" font-family="Arial, sans-serif" font-size="16">28 scenarios · deterministic pipeline and guardrail check · not a real-model quality result</text>
+  <rect x="40" y="112" width="880" height="48" rx="8" fill="#173b34"/>
+  <text x="58" y="143" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">CHECK</text>
+  <text x="650" y="143" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">RAW</text>
+  <text x="790" y="143" fill="#ffffff" font-family="Arial, sans-serif" font-size="15" font-weight="700">FINAL</text>
+  <g fill="#243b35" font-family="Arial, sans-serif" font-size="15">
+    <text x="58" y="193">Route matches engine</text>
+    <text x="58" y="223">Severe coverage</text>
+    <text x="58" y="253">No risk downgrade</text>
+    <text x="58" y="283">No false safe</text>
+    <text x="58" y="313">Numbers grounded</text>
+    <text x="58" y="343">Route IDs grounded</text>
+    <text x="58" y="373">Place names grounded</text>
+  </g>
+  <g fill="#176b50" font-family="Arial, sans-serif" font-size="15" font-weight="700">
+    <text x="640" y="193">28/28 · 100%</text>
+    <text x="640" y="223">28/28 · 100%</text>
+    <text x="640" y="253">28/28 · 100%</text>
+    <text x="640" y="283">28/28 · 100%</text>
+    <text x="640" y="313">28/28 · 100%</text>
+    <text x="640" y="343">28/28 · 100%</text>
+    <text x="640" y="373">28/28 · 100%</text>
+    <text x="780" y="193">28/28 · 100%</text>
+    <text x="780" y="223">28/28 · 100%</text>
+    <text x="780" y="253">28/28 · 100%</text>
+    <text x="780" y="283">28/28 · 100%</text>
+    <text x="780" y="313">28/28 · 100%</text>
+    <text x="780" y="343">28/28 · 100%</text>
+    <text x="780" y="373">28/28 · 100%</text>
+  </g>
+  <text x="40" y="412" fill="#4d625d" font-family="Arial, sans-serif" font-size="13">Validator interventions: 0 · Full report: backend/evals/reports/latest.md</text>
+</svg>

@@ -43,6 +43,7 @@ Dispatchers enter an origin, destination, departure time, cargo weight, and chec
 - **Arrival-time forecasts:** estimates when the truck reaches each checkpoint and uses the nearest available hourly forecast.
 - **Load-aware risk:** applies cargo-weight adjustments to the weather risk assessment.
 - **Explainable recommendations:** ranks route options using severe exposure first, followed by high-risk miles, distance-weighted average risk, and duration.
+- **Guarded AI dispatch briefings:** turns an engine-generated route plan into a dispatcher briefing, then validates and corrects it with deterministic safety rules.
 - **Interactive map:** displays route geometry, checkpoint conditions, risk overlays, and a 0-48 hour departure forecast.
 - **Fail-safe forecast gaps:** missing wind, rain, or snow data is reported explicitly and raises checkpoint risk to at least Severe; a checkpoint with all three unavailable is No Travel.
 
@@ -67,7 +68,11 @@ flowchart LR
     API -->|geocode| Geo[Open-Meteo Geocoding]
     API -->|driving alternatives| OSRM[OSRM]
     API -->|checkpoint forecasts| Weather[Open-Meteo Forecast]
-    API -->|ranked routes + weather| Web
+    API -->|engine-ranked routes + weather| Web
+    Web -->|POST /api/briefing/ + route plan| Briefing[Django briefing API]
+    Briefing -->|prompt| Provider[Configured briefing provider]
+    Provider -->|generated briefing| Guard[Schema validation + deterministic safety validator]
+    Guard -->|briefing + corrections| Web
     Web -->|route and risk layers| Map[Leaflet map]
 ```
 
@@ -78,6 +83,12 @@ flowchart LR
 | Route provider | OSRM public routing service |
 | Geocoding and weather | Open-Meteo APIs |
 | Hosting | Render static site and web service |
+
+## Design decisions
+
+- **The routing engine remains authoritative.** It calculates checkpoint risks, scores routes, and selects the recommendation. The language model explains the resulting plan; it does not choose or change the recommended route.
+- **Briefings are bounded decision support.** The briefing provider receives route summaries and checkpoint weather/risk data, not route geometry. Its output must match the briefing schema and is checked by deterministic rules; unsafe or unsupported content can be corrected or replaced with a fallback.
+- **Safety checks do not depend on model behavior.** The same evaluation checks validate generated and corrected briefings. CI uses a deterministic mock to exercise this pipeline and its guardrails, not to measure real-model quality.
 
 ## Run locally
 
@@ -123,7 +134,7 @@ Environment variable examples are documented in [`.env.example`](./.env.example)
 | --- | --- | --- |
 | `GET` | `/api/health/` | Render health check; returns `{"status":"ok"}` |
 | `POST` | `/api/plan/` | Geocode locations, score available routes, and return the recommendation |
-| `POST` | `/api/briefing/` | Generate and validate a dispatch briefing from a route-plan JSON body |
+| `POST` | `/api/briefing/` | Generate an AI dispatch briefing from the route plan, then apply deterministic safety validation |
 
 Example request:
 
@@ -169,14 +180,23 @@ the validator's behavior, not independent model quality; compare raw pass rates
 and correction rates when assessing model performance.
 
 The CI quality gate requires 100% final pass rates for all seven configured
-checks in `evals/thresholds.yaml`. CI runs this gate with `LLM_PROVIDER=mock`;
-that verifies the evaluation pipeline and deterministic guardrails only, not
-the quality of a real model's raw output. Run `python -m django run_evals`
-without `--gate` to generate a report locally without enforcing thresholds.
+checks in `evals/thresholds.yaml`. CI runs this gate with `LLM_PROVIDER=mock`.
+This verifies the evaluation pipeline and deterministic guardrails; **it does
+not measure real-model quality**. The mock is rule-based and is not a hosted
+language model. The committed [evaluation report](./backend/evals/reports/latest.md)
+is from the mock provider, so its raw pass rates must not be interpreted as
+evidence of real-model performance. Run `python -m django run_evals` without
+`--gate` using a hosted provider to generate a real-model report.
 
-The gate was verified with an intentionally broken validator and
-`MOCK_MODE=faulty_number` on a temporary branch. The run failed as expected on
-the `numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467).
+The mock run covered 28 scenarios and passed all seven checks on both raw and
+validator-corrected output (100% each); the validator made no interventions.
+These results confirm the mock-backed test pipeline only.
+
+![Mock evaluation results: 28 scenarios and seven checks passed](docs/images/eval-results.svg)
+
+The gate was also exercised with an intentionally broken validator and
+`MOCK_MODE=faulty_number` on a temporary branch. CI failed as expected on the
+`numbers_grounded` threshold: [GitHub Actions run #38](https://github.com/RONIN447/northline_dispatch_ops/actions/runs/40180426467).
 
 ![GitHub Actions showing the intentional evaluation-gate failure](docs/images/eval-gate-failure.png)
 
@@ -243,6 +263,7 @@ The frontend reads `VITE_API_BASE_URL` at build time; redeploy it after changing
 
 ## Limitations and safety
 
+- The briefing is AI-generated decision support, not an authoritative dispatch decision or a guarantee of road safety. Verify route and weather conditions, follow current carrier policy, official road advisories, and applicable regulations before dispatch.
 - `/api/briefing/` trusts the route-plan JSON submitted by the caller; it does not recompute trips or independently verify caller-supplied route and weather data. The response is only grounded in that submitted plan. The per-IP rate limit helps control provider cost; recomputing plans server-side is deferred.
 - Briefing requests are limited to 10 per client IP per minute and 500 per UTC day in the running process. The daily in-memory ceiling resets on process restart and is not shared across multiple workers or instances; provider dashboard spending limits are the durable cost backstop.
 - OSRM and Open-Meteo public services are demonstration providers and may be subject to availability or rate limits.
@@ -265,7 +286,7 @@ backend/
   urls.py
   wsgi.py
 docs/
-  images/                # Live application screenshots
+  images/                # Application screenshots and evaluation visuals
   DEPLOYMENT.md
   LOOM_SCRIPT.md
 frontend/
