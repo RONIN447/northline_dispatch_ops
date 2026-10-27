@@ -1,4 +1,9 @@
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "development-only-change-before-deployment")
 DEBUG = os.getenv("DEBUG", "True").lower() in {"1", "true", "yes", "on"}

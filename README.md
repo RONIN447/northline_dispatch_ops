@@ -185,8 +185,10 @@ This verifies the evaluation pipeline and deterministic guardrails; **it does
 not measure real-model quality**. The mock is rule-based and is not a hosted
 language model. The committed [evaluation report](./backend/evals/reports/latest.md)
 is from the mock provider, so its raw pass rates must not be interpreted as
-evidence of real-model performance. Run `python -m django run_evals` without
-`--gate` using a hosted provider to generate a real-model report.
+evidence of real-model performance. Run `python -m django run_evals --output
+evals/reports/real_model_v1.md` without `--gate` using a hosted provider to
+generate a real-model report. Reports include provider, model, prompt version,
+UTC date, overall raw/final rates, and raw/final rates by scenario category.
 
 The mock run covered 28 scenarios and passed all seven checks on both raw and
 validator-corrected output (100% each); the validator made no interventions.
@@ -213,15 +215,40 @@ $env:MOCK_MODE = "normal" # faulty_route, faulty_missing_checkpoint, faulty_numb
                           # faulty_place each exercise a specific check
 ```
 
-Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`, or
-`LLM_PROVIDER=openai` with `OPENAI_API_KEY` and `OPENAI_MODEL`, to call a hosted
-model. SDK imports are lazy, and provider requests have a 20-second timeout
-inside a 45-second Gunicorn worker timeout.
+Use `LLM_PROVIDER=anthropic` with `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`,
+`LLM_PROVIDER=openai` with `OPENAI_API_KEY` and `OPENAI_MODEL`,
+`LLM_PROVIDER=groq` with `GROQ_API_KEY` and `GROQ_MODEL`, or
+`LLM_PROVIDER=gemini` with `GEMINI_API_KEY` and `GEMINI_MODEL` to call a hosted
+model. Groq uses its OpenAI-compatible chat-completions API. SDK imports are
+lazy, and provider requests have a 20-second timeout inside a 45-second
+Gunicorn worker timeout.
+
+For local development, Python loads the ignored repository-root `.env` file.
+Add `LLM_PROVIDER=groq` and `GROQ_MODEL=<model ID>` there; store your key as
+`GROQ_API_KEY=<key>`. To avoid entering a key into a file, you can instead set
+these variables in PowerShell. Choose an active chat-completion model from your
+GroqCloud account.
+
+```powershell
+Set-Location 'C:\path\to\northline_dispatch_ops\backend'
+$env:LLM_PROVIDER = "groq"
+$secret = Read-Host "Groq API key" -AsSecureString
+$env:GROQ_API_KEY = (New-Object System.Net.NetworkCredential("", $secret)).Password
+$env:GROQ_MODEL = "llama-3.3-70b-versatile"
+$env:DJANGO_SETTINGS_MODULE = "settings"
+python -m django run_evals --output evals/reports/real_model_v1.md
+```
+
+Run without `--gate` to save the real-model report even if it misses the mock
+CI thresholds. Never commit `.env` or paste the key into chat. The Groq sample
+completion belongs in a standalone script or terminal, not in `routing/apps.py`;
+Django imports that module at startup and must not make provider calls there.
+
 Production requires an explicit `LLM_PROVIDER`; leaving it unset disables briefing
 generation with a configuration response. Responses identify the selected provider
-and model in metadata, including `mock` / `rule-based` when the mock is selected. Set
-provider spending limits in the Anthropic or OpenAI dashboard as an additional cost
-safeguard.
+and model in metadata, including `mock` / `rule-based` when the mock is selected.
+Set provider usage or spending limits in the selected provider dashboard as an
+additional cost safeguard.
 
 `briefing.service.generate_briefing(plan)` sends only route summaries and
 checkpoint weather/risk data (not route geometry), bounds location labels, and

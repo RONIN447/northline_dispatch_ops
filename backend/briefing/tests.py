@@ -2,13 +2,18 @@ import json
 import os
 from copy import deepcopy
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from django.test import Client
+import httpx
+from openai import BadRequestError, RateLimitError
 from pydantic import ValidationError
 
 from briefing.providers import (
+    GeminiProvider,
+    GroqProvider,
     MockProvider,
     GUNICORN_TIMEOUT_SECONDS,
     PROVIDER_TIMEOUT_SECONDS,
@@ -135,6 +140,48 @@ class BriefingProviderTests(unittest.TestCase):
         self.assertGreaterEqual(response.latency_ms, 0)
         self.assertEqual(validate_briefing(briefing, self.route_plan), [])
 
+    def test_gemini_provider_requests_json_and_records_usage(self):
+        provider = GeminiProvider(api_key="test-key", model="test-model")
+        response = SimpleNamespace(
+            text='{"summary":"ok"}',
+            usage_metadata=SimpleNamespace(
+                prompt_token_count=11,
+                candidates_token_count=7,
+            ),
+        )
+        with patch.object(
+            provider._client.models, "generate_content", return_value=response
+        ) as generate_content:
+            result = provider.generate("system prompt", "user prompt")
+
+        self.assertEqual(result.text, '{"summary":"ok"}')
+        self.assertEqual(result.input_tokens, 11)
+        self.assertEqual(result.output_tokens, 7)
+        self.assertEqual(result.tokens, 18)
+        self.assertEqual(generate_content.call_args.kwargs["model"], "test-model")
+        config = generate_content.call_args.kwargs["config"]
+        self.assertEqual(config.response_mime_type, "application/json")
+        self.assertEqual(config.system_instruction, "system prompt")
+
+    def test_gemini_provider_reports_api_status_without_response_body(self):
+        provider = GeminiProvider(api_key="test-key", model="test-model")
+        error = provider._api_error_type(
+            400,
+            {
+                "error": {
+                    "message": "response body must not be exposed",
+                    "status": "INVALID_ARGUMENT",
+                }
+            },
+        )
+        with patch.object(provider._client.models, "generate_content", side_effect=error):
+            with self.assertRaisesRegex(
+                ProviderRequestError, "HTTP 400, INVALID_ARGUMENT"
+            ) as raised:
+                provider.generate("system prompt", "user prompt")
+
+        self.assertNotIn("response body must not be exposed", str(raised.exception))
+
     def test_faulty_mock_is_caught_for_route_risk_and_invented_number(self):
         response = MockProvider(mode="faulty").generate("Return briefing JSON.", self.user)
         briefing = Briefing.model_validate_json(response.text)
@@ -177,6 +224,106 @@ class BriefingProviderTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "LLM_PROVIDER"):
                 get_provider()
 
+    def test_gemini_provider_requires_api_key_and_model(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(ValueError, "GEMINI_API_KEY"):
+                get_provider("gemini")
+        with patch.dict(os.environ, {"GEMINI_API_KEY": "test-key"}, clear=True):
+            with self.assertRaisesRegex(ValueError, "GEMINI_MODEL"):
+                get_provider("gemini")
+
+    def test_groq_provider_requires_api_key_and_model(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaisesRegex(ValueError, "GROQ_API_KEY"):
+                get_provider("groq")
+        with patch.dict(os.environ, {"GROQ_API_KEY": "test-key"}, clear=True):
+            with self.assertRaisesRegex(ValueError, "GROQ_MODEL"):
+                get_provider("groq")
+
+    def test_groq_provider_uses_openai_compatible_chat_completions(self):
+        provider = GroqProvider(api_key="test-key", model="test-model")
+        response = SimpleNamespace(
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content='{"summary":"ok"}')
+                )
+            ],
+            usage=SimpleNamespace(prompt_tokens=11, completion_tokens=7),
+        )
+        with patch.object(
+            provider._client.chat.completions,
+            "create",
+            return_value=response,
+        ) as create:
+            result = provider.generate("system prompt", "user prompt")
+
+        self.assertEqual(result.text, '{"summary":"ok"}')
+        self.assertEqual(result.input_tokens, 11)
+        self.assertEqual(result.output_tokens, 7)
+        self.assertEqual(result.tokens, 18)
+        self.assertEqual(create.call_args.kwargs["model"], "test-model")
+        self.assertEqual(
+            create.call_args.kwargs["response_format"], {"type": "json_object"}
+        )
+
+    def test_groq_provider_reports_safe_api_error_details(self):
+        provider = GroqProvider(api_key="test-key", model="test-model")
+        request = httpx.Request(
+            "POST", "https://api.groq.com/openai/v1/chat/completions"
+        )
+        response = httpx.Response(400, request=request)
+        error = BadRequestError(
+            "Bad request",
+            response=response,
+            body={
+                "error": {
+                    "message": "Model test-model is unavailable",
+                    "code": "model_not_found",
+                }
+            },
+        )
+        with patch.object(
+            provider._client.chat.completions, "create", side_effect=error
+        ):
+            with self.assertRaisesRegex(
+                ProviderRequestError,
+                "model_not_found, Model test-model is unavailable",
+            ) as raised:
+                provider.generate("system prompt", "user prompt")
+
+        self.assertNotIn("test-key", str(raised.exception))
+
+    def test_groq_provider_retries_rate_limits_with_backoff(self):
+        provider = GroqProvider(api_key="test-key", model="test-model")
+        request = httpx.Request(
+            "POST", "https://api.groq.com/openai/v1/chat/completions"
+        )
+        response = httpx.Response(
+            429,
+            request=request,
+            headers={"retry-after": "0.01"},
+        )
+        error = RateLimitError(
+            "Rate limited",
+            response=response,
+            body={"error": {"message": "try again", "code": "rate_limit_exceeded"}},
+        )
+        completion = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content='{"summary":"ok"}'))],
+            usage=SimpleNamespace(prompt_tokens=5, completion_tokens=3),
+        )
+        with patch.object(
+            provider._client.chat.completions,
+            "create",
+            side_effect=[error, completion],
+        ) as create, patch("briefing.providers.time.sleep") as sleep:
+            result = provider.generate("system prompt", "user prompt")
+
+        self.assertEqual(result.text, '{"summary":"ok"}')
+        self.assertEqual(create.call_count, 2)
+        self.assertEqual(sleep.call_count, 2)
+        self.assertAlmostEqual(sleep.call_args_list[0].args[0], 0.01)
+
     def test_non_mock_provider_requires_an_api_key(self):
         with patch.dict(os.environ, {}, clear=True):
             with self.assertRaisesRegex(ValueError, "ANTHROPIC_API_KEY"):
@@ -190,6 +337,7 @@ class BriefingProviderTests(unittest.TestCase):
             {
                 "ANTHROPIC_API_KEY": "test-key",
                 "OPENAI_API_KEY": "test-key",
+                "GROQ_API_KEY": "test-key",
             },
             clear=True,
         ):
@@ -197,6 +345,8 @@ class BriefingProviderTests(unittest.TestCase):
                 get_provider("anthropic")
             with self.assertRaisesRegex(ValueError, "OPENAI_MODEL"):
                 get_provider("openai")
+            with self.assertRaisesRegex(ValueError, "GROQ_MODEL"):
+                get_provider("groq")
 
 
 class BriefingServiceTests(unittest.TestCase):

@@ -58,6 +58,11 @@ class EvaluationRunnerTests(unittest.TestCase):
         self.assertIn("fallback_template", results[0]["interventions"])
         self.assertIn("Raw pass rate", report)
         self.assertIn("Final pass rate", report)
+        self.assertIn("Provider: mock", report)
+        self.assertIn("Model: rule-based", report)
+        self.assertIn("Prompt version: v1", report)
+        self.assertIn("Pass rates by scenario category", report)
+        self.assertIn("| severe | 1 |", report)
         self.assertIn("fallback_template", report)
         self.assertEqual(
             len(CHECK_NAMES),

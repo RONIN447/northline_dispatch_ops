@@ -1,6 +1,7 @@
 """Run raw and validator-corrected briefings against the golden scenarios."""
 
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 from briefing.validator import enforce
@@ -16,6 +17,14 @@ CHECK_NAMES = (
     "route_ids_grounded",
     "place_names_grounded",
 )
+CATEGORY_LABELS = {
+    "normal_trip": "normal",
+    "severe_or_no_travel": "severe",
+    "forecast_unavailable": "forecast gap",
+    "threshold_boundary": "threshold",
+    "all_routes_risky": "all-risky",
+    "near_tie_routes": "near-tie",
+}
 REPORT_PATH = Path(__file__).resolve().parent / "reports" / "latest.md"
 THRESHOLDS_PATH = Path(__file__).resolve().parent / "thresholds.yaml"
 
@@ -43,7 +52,10 @@ def run_evaluations(scenarios=None, generate=None):
         results.append(
             {
                 "id": scenario["id"],
+                "category": scenario.get("category", "uncategorized"),
                 "provider": metadata.provider,
+                "model": metadata.model,
+                "prompt_version": metadata.prompt_version,
                 "raw_checks": raw_checks,
                 "final_checks": final_checks,
                 "interventions": [item.rule for item in interventions],
@@ -58,8 +70,16 @@ def run_evaluations(scenarios=None, generate=None):
 def render_report(results, intervention_counts, fallback_count):
     """Render aggregate raw/final pass rates and correction counts as Markdown."""
     total = len(results)
+    providers = sorted({result["provider"] for result in results})
+    models = sorted({result["model"] for result in results})
+    prompt_versions = sorted({result["prompt_version"] for result in results})
     lines = [
         "# Briefing evaluation report",
+        "",
+        "- Date (UTC): {}".format(datetime.now(timezone.utc).date().isoformat()),
+        "- Provider: {}".format(", ".join(providers) or "unknown"),
+        "- Model: {}".format(", ".join(models) or "unknown"),
+        "- Prompt version: {}".format(", ".join(prompt_versions) or "unknown"),
         "",
         "Scenarios: {} | Raw briefings: {} | Validator-corrected briefings: {}".format(
             total, total, total
@@ -82,6 +102,44 @@ def render_report(results, intervention_counts, fallback_count):
                 _percentage(final_passes, total),
             )
         )
+
+    lines.extend(
+        [
+            "",
+            "## Pass rates by scenario category",
+            "",
+            "| Category | Scenarios | Check | Raw pass rate | Final pass rate |",
+            "| --- | ---: | --- | ---: | ---: |",
+        ]
+    )
+    observed_categories = {result["category"] for result in results}
+    categories = [category for category in CATEGORY_LABELS if category in observed_categories]
+    categories.extend(sorted(observed_categories - set(CATEGORY_LABELS)))
+    for category in categories:
+        category_results = [
+            result for result in results if result["category"] == category
+        ]
+        category_total = len(category_results)
+        for check in CHECK_NAMES:
+            raw_passes = sum(
+                result["raw_checks"][check] for result in category_results
+            )
+            final_passes = sum(
+                result["final_checks"][check] for result in category_results
+            )
+            lines.append(
+                "| {} | {} | {} | {:.1f}% ({}/{}) | {:.1f}% ({}/{}) |".format(
+                    CATEGORY_LABELS.get(category, category),
+                    category_total,
+                    check,
+                    _percentage(raw_passes, category_total),
+                    raw_passes,
+                    category_total,
+                    _percentage(final_passes, category_total),
+                    final_passes,
+                    category_total,
+                )
+            )
 
     lines.extend(
         [

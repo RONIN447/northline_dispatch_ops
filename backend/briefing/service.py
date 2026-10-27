@@ -10,6 +10,8 @@ from pydantic import ValidationError
 from briefing.prompt import PROMPT_VERSION, SYSTEM_PROMPT
 from briefing.providers import (
     AnthropicProvider,
+    GeminiProvider,
+    GroqProvider,
     MockProvider,
     OpenAIProvider,
     Provider,
@@ -162,6 +164,10 @@ def _provider_name(provider: Provider) -> str:
         return "anthropic"
     if isinstance(provider, OpenAIProvider):
         return "openai"
+    if isinstance(provider, GeminiProvider):
+        return "gemini"
+    if isinstance(provider, GroqProvider):
+        return "groq"
     return provider.__class__.__name__
 
 

@@ -1,6 +1,7 @@
 """Run the golden briefing evaluation suite."""
 
 from django.core.management.base import BaseCommand, CommandError
+from pathlib import Path
 
 from evals.runner import (
     REPORT_PATH,
@@ -20,13 +21,19 @@ class Command(BaseCommand):
             action="store_true",
             help="Exit with an error if final pass rates miss configured thresholds.",
         )
+        parser.add_argument(
+            "--output",
+            default=str(REPORT_PATH),
+            help="Write the report to this path instead of evals/reports/latest.md.",
+        )
 
     def handle(self, *args, **options):
+        report_path = Path(options["output"])
         try:
             report, results = run_evaluations()
             failures = quality_gate_failures(results)
             report += render_quality_gate(results)
-            write_report(report)
+            write_report(report, report_path)
         except Exception as error:
             raise CommandError(
                 "Briefing evaluation failed ({}): {}".format(
@@ -36,7 +43,7 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 "Evaluated {} scenarios; report written to {}.".format(
-                    len(results), REPORT_PATH
+                    len(results), report_path.resolve()
                 )
             )
         )

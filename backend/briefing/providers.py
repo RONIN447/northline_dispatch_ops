@@ -289,6 +289,154 @@ class OpenAIProvider:
         )
 
 
+class GroqProvider:
+    MIN_REQUEST_INTERVAL_SECONDS = 2.1
+    MAX_RATE_LIMIT_RETRIES = 3
+
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        api_key = api_key or os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is required for the Groq provider.")
+        self._model = model or os.getenv("GROQ_MODEL")
+        if not self._model:
+            raise ValueError("GROQ_MODEL is required for the Groq provider.")
+        self._api_key = api_key
+        self._last_request_at = None
+        try:
+            from openai import APIError, OpenAI
+        except ImportError as error:
+            raise RuntimeError("Install the openai package to use the Groq provider.") from error
+        self._api_error_type = APIError
+        self._client = OpenAI(
+            api_key=api_key,
+            base_url="https://api.groq.com/openai/v1",
+            timeout=PROVIDER_TIMEOUT_SECONDS,
+            max_retries=0,
+        )
+
+    def generate(self, system: str, user: str) -> ProviderResponse:
+        started = time.perf_counter()
+        for attempt in range(self.MAX_RATE_LIMIT_RETRIES + 1):
+            if self._last_request_at is not None:
+                elapsed = time.monotonic() - self._last_request_at
+                if elapsed < self.MIN_REQUEST_INTERVAL_SECONDS:
+                    time.sleep(self.MIN_REQUEST_INTERVAL_SECONDS - elapsed)
+            self._last_request_at = time.monotonic()
+            try:
+                response = self._client.chat.completions.create(
+                    model=self._model,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user},
+                    ],
+                    response_format={"type": "json_object"},
+                    temperature=0,
+                    max_tokens=1200,
+                )
+                break
+            except self._api_error_type as error:
+                if error.status_code == 429 and attempt < self.MAX_RATE_LIMIT_RETRIES:
+                    time.sleep(self._rate_limit_retry_delay(error, attempt))
+                    continue
+                body = getattr(error, "body", None)
+                details = body.get("error", {}) if isinstance(body, dict) else {}
+                message = details.get("message") if isinstance(details, dict) else None
+                code = details.get("code") if isinstance(details, dict) else None
+                safe_message = str(message or "").replace(
+                    self._api_key, "[REDACTED]"
+                )[:300]
+                error_details = ", ".join(
+                    item
+                    for item in (str(code) if code else "", safe_message)
+                    if item
+                )
+                raise ProviderRequestError(
+                    "Groq briefing request failed (HTTP {}{}).".format(
+                        error.status_code,
+                        ", " + error_details if error_details else "",
+                    )
+                ) from error
+
+        text = response.choices[0].message.content or ""
+        input_tokens = response.usage.prompt_tokens if response.usage else 0
+        output_tokens = response.usage.completion_tokens if response.usage else 0
+        return ProviderResponse(
+            text,
+            input_tokens + output_tokens,
+            (time.perf_counter() - started) * 1000,
+            input_tokens,
+            output_tokens,
+        )
+
+    @staticmethod
+    def _rate_limit_retry_delay(error, attempt):
+        response = getattr(error, "response", None)
+        headers = response.headers if response is not None else {}
+        for header in ("retry-after", "x-ratelimit-reset-requests"):
+            value = headers.get(header)
+            if value:
+                normalized = value[:-1] if value.endswith("s") else value
+                try:
+                    return max(float(normalized), 0.0)
+                except ValueError:
+                    pass
+        return float(2 ** (attempt + 1))
+
+
+class GeminiProvider:
+    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+        api_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY is required for the Gemini provider.")
+        self._model = model or os.getenv("GEMINI_MODEL")
+        if not self._model:
+            raise ValueError("GEMINI_MODEL is required for the Gemini provider.")
+        try:
+            from google import genai
+            from google.genai import errors, types
+        except ImportError as error:
+            raise RuntimeError("Install the google-genai package to use Gemini.") from error
+        self._api_error_type = errors.APIError
+        self._types = types
+        self._client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(
+                timeout=int(PROVIDER_TIMEOUT_SECONDS * 1000)
+            ),
+        )
+
+    def generate(self, system: str, user: str) -> ProviderResponse:
+        started = time.perf_counter()
+        try:
+            response = self._client.models.generate_content(
+                model=self._model,
+                contents=user,
+                config=self._types.GenerateContentConfig(
+                    system_instruction=system,
+                    response_mime_type="application/json",
+                    temperature=0,
+                    max_output_tokens=1200,
+                ),
+            )
+        except self._api_error_type as error:
+            raise ProviderRequestError(
+                "Gemini briefing request failed (HTTP {}, {}).".format(
+                    error.code, error.status
+                )
+            ) from error
+        text = response.text or ""
+        usage = response.usage_metadata
+        input_tokens = getattr(usage, "prompt_token_count", 0) or 0
+        output_tokens = getattr(usage, "candidates_token_count", 0) or 0
+        return ProviderResponse(
+            text,
+            input_tokens + output_tokens,
+            (time.perf_counter() - started) * 1000,
+            input_tokens,
+            output_tokens,
+        )
+
+
 def get_provider(name: Optional[str] = None) -> Provider:
     configured_name = name or os.getenv("LLM_PROVIDER")
     if not configured_name and (
@@ -305,4 +453,10 @@ def get_provider(name: Optional[str] = None) -> Provider:
         return AnthropicProvider()
     if provider_name == "openai":
         return OpenAIProvider()
-    raise ValueError("LLM_PROVIDER must be 'mock', 'anthropic', or 'openai'.")
+    if provider_name == "groq":
+        return GroqProvider()
+    if provider_name == "gemini":
+        return GeminiProvider()
+    raise ValueError(
+        "LLM_PROVIDER must be 'mock', 'anthropic', 'openai', 'groq', or 'gemini'."
+    )
