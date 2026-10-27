@@ -1,13 +1,15 @@
 """Run the golden briefing evaluation suite."""
 
-from django.core.management.base import BaseCommand, CommandError
 from pathlib import Path
+
+from django.core.management.base import BaseCommand, CommandError
 
 from evals.runner import (
     REPORT_PATH,
     quality_gate_failures,
     render_quality_gate,
     run_evaluations,
+    write_failure_analysis,
     write_report,
 )
 
@@ -26,6 +28,10 @@ class Command(BaseCommand):
             default=str(REPORT_PATH),
             help="Write the report to this path instead of evals/reports/latest.md.",
         )
+        parser.add_argument(
+            "--failure-analysis",
+            help="Export raw failed checks and validator corrections to this CSV path.",
+        )
 
     def handle(self, *args, **options):
         report_path = Path(options["output"])
@@ -34,6 +40,8 @@ class Command(BaseCommand):
             failures = quality_gate_failures(results)
             report += render_quality_gate(results)
             write_report(report, report_path)
+            if options["failure_analysis"]:
+                write_failure_analysis(results, Path(options["failure_analysis"]))
         except Exception as error:
             raise CommandError(
                 "Briefing evaluation failed ({}): {}".format(
@@ -47,6 +55,14 @@ class Command(BaseCommand):
                 )
             )
         )
+        if options["failure_analysis"]:
+            self.stdout.write(
+                self.style.SUCCESS(
+                    "Failure analysis written to {}.".format(
+                        Path(options["failure_analysis"]).resolve()
+                    )
+                )
+            )
         if options["gate"] and failures:
             raise CommandError(
                 "Evaluation quality gate failed: {}".format("; ".join(failures))

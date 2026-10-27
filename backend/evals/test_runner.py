@@ -2,6 +2,7 @@
 
 import json
 import os
+import csv
 import unittest
 from io import StringIO
 from unittest.mock import patch
@@ -22,6 +23,7 @@ from evals.runner import (
     load_thresholds,
     quality_gate_failures,
     run_evaluations,
+    write_failure_analysis,
     write_report,
 )
 from evals.scenarios import load_scenarios
@@ -47,6 +49,7 @@ class EvaluationRunnerTests(unittest.TestCase):
                     output_tokens=0,
                     latency_ms=0,
                     retry_count=0,
+                    raw_output=response.text,
                 ),
             )
 
@@ -64,6 +67,8 @@ class EvaluationRunnerTests(unittest.TestCase):
         self.assertIn("Pass rates by scenario category", report)
         self.assertIn("| severe | 1 |", report)
         self.assertIn("fallback_template", report)
+        self.assertIn("999 hours", results[0]["raw_llm_output"])
+        self.assertNotIn("999 hours", results[0]["final_output"])
         self.assertEqual(
             len(CHECK_NAMES),
             len(
@@ -77,6 +82,49 @@ class EvaluationRunnerTests(unittest.TestCase):
                 )
             ),
         )
+
+    def test_failure_analysis_csv_contains_raw_failure_and_validator_correction(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+
+        scenario = next(
+            item
+            for item in load_scenarios()
+            if item["category"] == "severe_or_no_travel"
+        )
+
+        def generate(plan):
+            response = MockProvider("faulty_number").generate("", json.dumps(plan))
+            return (
+                Briefing.model_validate_json(response.text),
+                BriefingMetadata(
+                    provider="mock",
+                    model="rule-based",
+                    prompt_version="v1",
+                    input_tokens=0,
+                    output_tokens=0,
+                    latency_ms=0,
+                    retry_count=0,
+                    raw_output=response.text,
+                ),
+            )
+
+        _, results = run_evaluations([scenario], generate)
+        with TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "analysis" / "failures.csv"
+            write_failure_analysis(results, path)
+            with path.open(encoding="utf-8", newline="") as csv_file:
+                rows = list(csv.DictReader(csv_file))
+
+        number_failure = next(
+            row for row in rows if row["failed_check"] == "numbers_grounded"
+        )
+        self.assertEqual(number_failure["scenario_id"], scenario["id"])
+        self.assertEqual(number_failure["category"], "severe")
+        self.assertIn("999 hours", number_failure["raw_llm_output"])
+        self.assertIn("fallback_template", number_failure["validator_action"])
+        self.assertNotIn("999 hours", number_failure["final_output"])
+        self.assertIn("number not supported", number_failure["reason_for_failure"])
 
     def test_report_is_written_to_requested_location(self):
         from tempfile import TemporaryDirectory

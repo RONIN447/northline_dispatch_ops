@@ -1,6 +1,7 @@
 """Run raw and validator-corrected briefings against the golden scenarios."""
 
 from collections import Counter
+import csv
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,6 +18,15 @@ CHECK_NAMES = (
     "route_ids_grounded",
     "place_names_grounded",
 )
+FAILURE_REASONS = {
+    "route_matches_engine": "The generated recommendation did not match the engine-selected route.",
+    "severe_coverage": "The generated briefing omitted one or more Severe or No Travel checkpoints.",
+    "no_risk_downgrade": "A generated checkpoint risk was lower than the engine's risk.",
+    "no_false_safe": "The briefing omitted required risk or forecast-gap data, or made an unsafe reassurance claim.",
+    "numbers_grounded": "The briefing included a number not supported by the route plan.",
+    "route_ids_grounded": "The briefing included a route ID not present in the route plan.",
+    "place_names_grounded": "The briefing included a place name not grounded in the route plan.",
+}
 CATEGORY_LABELS = {
     "normal_trip": "normal",
     "severe_or_no_travel": "severe",
@@ -56,9 +66,14 @@ def run_evaluations(scenarios=None, generate=None):
                 "provider": metadata.provider,
                 "model": metadata.model,
                 "prompt_version": metadata.prompt_version,
+                "raw_llm_output": metadata.raw_output or raw.model_dump_json(indent=2),
+                "final_output": final.model_dump_json(indent=2),
                 "raw_checks": raw_checks,
                 "final_checks": final_checks,
                 "interventions": [item.rule for item in interventions],
+                "validator_actions": [
+                    "{}: {}".format(item.rule, item.detail) for item in interventions
+                ],
                 "fallback_used": fallback_used,
             }
         )
@@ -187,6 +202,43 @@ def write_report(report, path=REPORT_PATH):
     """Persist a completed report, creating the report directory if needed."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(report, encoding="utf-8")
+
+
+def write_failure_analysis(results, path):
+    """Write one CSV row per raw failed check with generated and corrected output."""
+    fieldnames = (
+        "scenario_id",
+        "category",
+        "failed_check",
+        "raw_llm_output",
+        "validator_action",
+        "final_output",
+        "reason_for_failure",
+    )
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for result in results:
+            for check in CHECK_NAMES:
+                if result["raw_checks"][check]:
+                    continue
+                writer.writerow(
+                    {
+                        "scenario_id": result["id"],
+                        "category": CATEGORY_LABELS.get(
+                            result["category"], result["category"]
+                        ),
+                        "failed_check": check,
+                        "raw_llm_output": result["raw_llm_output"],
+                        "validator_action": "; ".join(
+                            result["validator_actions"]
+                        ),
+                        "final_output": result["final_output"],
+                        "reason_for_failure": FAILURE_REASONS[check],
+                    }
+                )
 
 
 def load_thresholds(path=THRESHOLDS_PATH):

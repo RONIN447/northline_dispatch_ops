@@ -168,6 +168,13 @@ python -m evals.build_scenarios
 python -m django run_evals --gate
 ```
 
+Export one CSV row per failed raw check, including the model output and the
+validator's corrected output, by adding `--failure-analysis`:
+
+```powershell
+python -m django run_evals --failure-analysis evals/failure_analysis_v1.csv
+```
+
 The briefing tests validate the captured route-plan responses against the
 Python 3.9-compatible Pydantic models. The scenario generator rebuilds the
 golden dataset from `evals/scenarios/raw/`, uses the routing engine for risk

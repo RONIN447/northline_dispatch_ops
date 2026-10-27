@@ -59,6 +59,7 @@ class BriefingMetadata:
     output_tokens: int
     latency_ms: float
     retry_count: int
+    raw_output: str = ""
 
 
 class BriefingGenerationError(ValueError):
@@ -105,6 +106,7 @@ def generate_briefing(plan: Dict[str, Any]) -> Tuple[Briefing, BriefingMetadata]
             output_tokens=output_tokens,
             latency_ms=latency_ms,
             retry_count=attempt,
+            raw_output=response.text,
         )
         return briefing, metadata
 
